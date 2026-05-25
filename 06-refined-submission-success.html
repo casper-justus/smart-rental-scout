@@ -1,0 +1,261 @@
+<!DOCTYPE html><html class="light" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Application Submitted - TenantMatch</title>
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Design System Config -->
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "surface-container": "#eceef0",
+            "secondary-container": "#62fae3",
+            "on-primary-fixed-variant": "#364669",
+            "on-secondary-fixed": "#00201c",
+            "background": "#f7f9fb",
+            "surface": "#f7f9fb",
+            "on-surface": "#191c1e",
+            "surface-tint": "#4e5e82",
+            "on-background": "#191c1e",
+            "tertiary-fixed-dim": "#b7c8e1",
+            "primary-container": "#1a2b4c",
+            "tertiary-fixed": "#d3e4fe",
+            "primary-fixed-dim": "#b6c6f0",
+            "inverse-primary": "#b6c6f0",
+            "primary": "#031636",
+            "on-secondary": "#ffffff",
+            "surface-container-lowest": "#ffffff",
+            "primary-fixed": "#d8e2ff",
+            "on-secondary-container": "#007165",
+            "tertiary-container": "#1d2d41",
+            "error": "#ba1a1a",
+            "surface-bright": "#f7f9fb",
+            "surface-container-low": "#f2f4f6",
+            "outline-variant": "#c5c6cf",
+            "on-tertiary": "#ffffff",
+            "on-primary": "#ffffff",
+            "inverse-surface": "#2d3133",
+            "on-primary-fixed": "#071b3b",
+            "surface-container-highest": "#e0e3e5",
+            "surface-dim": "#d8dadc",
+            "surface-variant": "#e0e3e5",
+            "on-tertiary-container": "#8494ac",
+            "on-surface-variant": "#44474e",
+            "error-container": "#ffdad6",
+            "on-tertiary-fixed-variant": "#38485d",
+            "on-secondary-fixed-variant": "#005047",
+            "tertiary": "#07182b",
+            "secondary-fixed-dim": "#3cddc7",
+            "on-error": "#ffffff",
+            "secondary": "#006b5f",
+            "outline": "#75777f",
+            "surface-container-high": "#e6e8ea",
+            "secondary-fixed": "#62fae3",
+            "on-error-container": "#93000a",
+            "on-tertiary-fixed": "#0b1c30",
+            "on-primary-container": "#8293ba",
+            "inverse-on-surface": "#eff1f3"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "stack-sm": "4px",
+            "stack-lg": "24px",
+            "stack-md": "16px",
+            "base": "8px",
+            "gutter": "12px",
+            "container-margin": "20px"
+          },
+          "fontFamily": {
+            "label-caps": ["Inter"],
+            "headline-sm": ["Inter"],
+            "headline-md": ["Inter"],
+            "body-md": ["Inter"],
+            "headline-lg-mobile": ["Inter"],
+            "data-display": ["Inter"],
+            "headline-lg": ["Inter"],
+            "body-lg": ["Inter"]
+          },
+          "fontSize": {
+            "label-caps": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700" }],
+            "headline-sm": ["16px", { "lineHeight": "24px", "fontWeight": "600" }],
+            "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+            "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+            "headline-lg-mobile": ["26px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+            "data-display": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+            "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+            "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      line-height: 1;
+      text-transform: none;
+      letter-spacing: normal;
+      word-wrap: normal;
+      white-space: nowrap;
+      direction: ltr;
+    }
+    body {
+      background-color: #f7f9fb;
+      -webkit-font-smoothing: antialiased;
+      min-height: max(884px, 100dvh);
+    }
+    .celebration-pulse {
+      animation: pulse 2s infinite ease-in-out;
+    }
+    @keyframes pulse {
+      0% { transform: scale(1); opacity: 0.8; }
+      50% { transform: scale(1.05); opacity: 1; }
+      100% { transform: scale(1); opacity: 0.8; }
+    }
+  </style>
+</head>
+<body class="bg-surface text-on-surface dark:bg-gray-950 min-h-screen font-body-md text-body-md antialiased">
+<a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[100] focus:bg-primary-container focus:text-white focus:px-4 focus:py-2 focus:rounded-full focus:outline-none">Skip to main content</a>
+<!-- TopAppBar -->
+<header class="w-full sticky top-0 z-50 bg-surface dark:bg-surface-dim border-b border-outline-variant dark:border-on-surface-variant" role="banner">
+<div class="flex items-center justify-between px-container-margin py-base w-full max-w-7xl mx-auto">
+<div class="flex items-center gap-4">
+<a href="15-home-page.html" class="block no-underline"><span class="material-symbols-outlined text-primary dark:text-primary-fixed-dim cursor-pointer active:opacity-70">arrow_back</span></a>
+<div class="flex items-center gap-3">
+<svg class="w-8 h-8 flex-shrink-0" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="TenantMatch">
+  <rect width="32" height="32" rx="8" fill="#62fae3"/>
+  <path d="M16 5L4 16h3v11h8V18h2v9h8V16h3L16 5z" fill="#031636"/>
+</svg>
+<h1 class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed-dim">Application Submitted</h1>
+</div>
+</div>
+<div class="flex items-center">
+<button onclick="toggleDarkMode()" class="p-2 hover:bg-surface-container-low dark:hover:bg-gray-700 transition-colors rounded-full text-primary dark:text-primary-fixed active:scale-95 duration-150" aria-label="Toggle dark mode">
+  <span class="material-symbols-outlined" id="darkModeIcon">dark_mode</span>
+</button>
+<a href="15-home-page.html" class="block no-underline"><span class="material-symbols-outlined text-on-surface-variant dark:text-gray-400 cursor-pointer hover:bg-surface-container-low transition-colors p-2 rounded-full">close</span></a>
+</div>
+</div>
+</header>
+<main id="main-content" class="flex-grow w-full max-w-2xl mx-auto px-container-margin py-stack-lg">
+<!-- Hero Section -->
+<section class="flex flex-col items-center text-center space-y-stack-md mb-stack-lg">
+<div class="w-24 h-24 bg-secondary-container text-on-secondary-container rounded-full flex items-center justify-center celebration-pulse shadow-sm">
+<span class="material-symbols-outlined text-5xl" style="font-variation-settings: 'FILL' 1;" aria-hidden="true">check_circle</span>
+</div>
+<div class="space-y-stack-sm">
+<h2 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-primary dark:text-gray-100">Application Sent!</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant dark:text-gray-400">Your application for <span class="font-bold text-primary dark:text-gray-100">The Lumina - Unit 4B</span> has been successfully submitted.</p>
+</div>
+</section>
+<!-- Status Card -->
+<section class="bg-surface-container-lowest dark:bg-gray-900 border border-outline-variant dark:border-gray-700 rounded-xl p-6 mb-stack-lg shadow-sm">
+<div class="flex flex-col space-y-4">
+<div class="flex justify-between items-center">
+<span class="font-label-caps text-label-caps text-on-surface-variant dark:text-gray-400 uppercase tracking-wider">Current Status</span>
+<span class="px-3 py-1 bg-secondary-fixed text-on-secondary-fixed font-label-caps text-label-caps rounded-full">UNDER REVIEW</span>
+</div>
+<div class="flex items-center gap-3">
+<div class="p-3 bg-surface-container rounded-lg">
+<span class="material-symbols-outlined text-primary dark:text-gray-100" aria-hidden="true">schedule</span>
+</div>
+<div>
+<p class="font-headline-sm text-headline-sm text-primary dark:text-gray-100">24-48 hours</p>
+<p class="font-body-md text-body-md text-on-surface-variant dark:text-gray-400">Estimated processing time</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Next Steps Section -->
+<section class="space-y-stack-md mb-stack-lg">
+<h3 class="font-headline-sm text-headline-sm text-primary dark:text-gray-100 px-1">What's next?</h3>
+<div class="pl-2"><!-- Step 1 -->
+<div class="relative flex items-start gap-4 pb-6">
+<!-- Vertical Line -->
+<div class="absolute left-4 top-8 bottom-0 w-0.5 bg-outline-variant"></div>
+<div class="relative z-10 flex-shrink-0 w-8 h-8 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center font-bold text-sm border-2 border-surface-container-lowest">
+    1
+  </div>
+<div class="flex flex-col">
+<p class="font-headline-sm text-headline-sm text-primary dark:text-gray-100">Landlord reviews profile</p>
+<p class="font-body-md text-body-md text-on-surface-variant dark:text-gray-400 mt-1">The property manager will evaluate your tenant score and income documents.</p>
+</div>
+</div>
+<!-- Step 2 -->
+<div class="relative flex items-start gap-4 pb-6">
+<!-- Vertical Line -->
+<div class="absolute left-4 top-8 bottom-0 w-0.5 bg-outline-variant"></div>
+<div class="relative z-10 flex-shrink-0 w-8 h-8 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center font-bold text-sm border-2 border-surface-container-lowest">
+    2
+  </div>
+<div class="flex flex-col">
+<p class="font-headline-sm text-headline-sm text-primary dark:text-gray-100">Background check completes</p>
+<p class="font-body-md text-body-md text-on-surface-variant dark:text-gray-400 mt-1">Final automated verification of your references and credit history.</p>
+</div>
+</div>
+<!-- Step 3 -->
+<div class="relative flex items-start gap-4">
+<div class="relative z-10 flex-shrink-0 w-8 h-8 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center font-bold text-sm border-2 border-surface-container-lowest">
+    3
+  </div>
+<div class="flex flex-col">
+<p class="font-headline-sm text-headline-sm text-primary dark:text-gray-100">Receive notification</p>
+<p class="font-body-md text-body-md text-on-surface-variant dark:text-gray-400 mt-1">You'll be notified via app and email as soon as a decision is made.</p>
+</div>
+</div></div>
+</section>
+<!-- Actions -->
+<section class="flex flex-col space-y-3 pb-24 md:pb-8">
+<a href="15-home-page.html" class="w-full bg-primary text-on-primary font-headline-sm text-headline-sm py-4 rounded-xl active:scale-95 transition-transform shadow-xl font-bold block text-center no-underline">View Application Status</a>
+<a href="15-home-page.html" class="w-full bg-transparent border-2 border-secondary text-secondary font-headline-sm text-headline-sm py-4 rounded-xl active:scale-95 transition-transform block text-center no-underline">Return to Home</a>
+</section>
+</main>
+<!-- BottomNavBar (Mobile) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-center bg-surface dark:bg-gray-950 px-gutter pb-stack-md pt-base z-50 rounded-t-xl border-t border-outline-variant dark:border-gray-700 shadow-lg">
+<a href="15-home-page.html" class="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container rounded-xl px-4 py-1 active:scale-90 transition-transform duration-200" aria-current="page">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;" aria-hidden="true">home</span>
+<span class="font-label-caps text-label-caps mt-1">Home</span>
+</a>
+<a href="16-map-search.html" class="flex flex-col items-center justify-center text-on-surface-variant dark:text-gray-400 px-4 py-1 hover:bg-surface-container-low active:scale-90 transition-transform duration-200 rounded-xl">
+<span class="material-symbols-outlined" aria-hidden="true">search</span>
+<span class="font-label-caps text-label-caps mt-1">Search</span>
+</a>
+<a href="14-saved-searches.html" class="flex flex-col items-center justify-center text-on-surface-variant dark:text-gray-400 px-4 py-1 hover:bg-surface-container-low active:scale-90 transition-transform duration-200 rounded-xl">
+<span class="material-symbols-outlined" aria-hidden="true">favorite</span>
+<span class="font-label-caps text-label-caps mt-1">Saved</span>
+</a>
+<a href="05-user-profile.html" class="flex flex-col items-center justify-center text-on-surface-variant dark:text-gray-400 px-4 py-1 hover:bg-surface-container-low active:scale-90 transition-transform duration-200 rounded-xl">
+<span class="material-symbols-outlined" aria-hidden="true">person</span>
+<span class="font-label-caps text-label-caps mt-1">Profile</span>
+</a>
+</nav>
+<!-- Illustration Placement (Invisible, for data-alt descriptive context) -->
+<div class="hidden">
+<img data-alt="A sophisticated digital illustration celebrating a successful real estate application. The scene features a minimalist living room with floor-to-ceiling windows showing a teal-hued cityscape. Soft morning light streams into the space, illuminating a clean navy blue sofa and sleek professional furniture. Abstract floating geometric shapes in white and teal dance around the center, symbolizing joy and digital connectivity. The overall mood is expert, transparent, and calm, using a palette of Slate Gray, Deep Navy, and Teal accents." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB8yNhmFX0i5EtbCdrAMsbcjQvE-qlCoUiJs-FNjdl91-h9ADhuqMrrqoZTp4TIUNQ9uYrSZAxrYGqsT25NCpv-KSpETZpsv9sguxml4rKiknIf74SJ5n80JeIJ8jebIfN1KbhZ3VSD7cQMGhQWRR7U6eUjF2tg5Ub3mhaiE68e2OligWr9XMsAGz3DVseY-5Z06QZGVA4pHy23QQBuhMSnFDFV-0RN5Wq0HboAsD8FZphWY6F5VdgEJxf8NsHE2hjs6yIhAEWOth4">
+</div>
+<script>
+    // Minimal interaction script for micro-effects
+    document.querySelectorAll('button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        // Simple haptic-like visual feedback already handled by CSS scale
+      });
+    });
+  </script>
+
+
+  <script src="app.js"></script>
+</body></html>
