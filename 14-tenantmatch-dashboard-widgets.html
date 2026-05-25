@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartRental Scout – Dashboard with Widgets</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family:'Inter',sans-serif;
+      background:#f4f6fa;
+      color:#1a1a2e;
+      padding:24px;
+    }
+    .dashboard {
+      max-width:700px;
+      margin:0 auto;
+    }
+    .dash-header {
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:20px;
+    }
+    .dash-header h1 { font-size:24px; }
+    .dash-header .date { color:#6b7280; font-size:14px; }
+    .row {
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:14px;
+      margin-bottom:14px;
+    }
+    .widget {
+      background:#fff;
+      border-radius:18px;
+      padding:18px;
+      box-shadow:0 6px 18px rgba(0,0,0,0.04);
+    }
+    .widget-full { grid-column:1 / -1; }
+    .widget-title {
+      font-size:13px;
+      text-transform:uppercase;
+      letter-spacing:0.5px;
+      color:#9ca3af;
+      margin-bottom:8px;
+    }
+    .stat-number {
+      font-size:32px;
+      font-weight:700;
+    }
+    .stat-change {
+      font-size:13px;
+      margin-top:4px;
+    }
+    .stat-up { color:#22c55e; }
+    .stat-down { color:#ef4444; }
+    .listing-item {
+      display:flex;
+      align-items:center;
+      gap:12px;
+      padding:10px 0;
+      border-bottom:1px solid #f3f4f6;
+    }
+    .listing-item:last-child { border-bottom:none; }
+    .listing-img {
+      width:44px;height:44px;
+      border-radius:10px;
+      background:#e5e7eb;
+      flex-shrink:0;
+    }
+    .listing-info { flex:1; }
+    .listing-name { font-weight:600; font-size:14px; }
+    .listing-addr { font-size:12px; color:#6b7280; }
+    .listing-price { font-weight:700; color:#1a1a2e; }
+    .progress-bar {
+      height:6px;
+      background:#e5e7eb;
+      border-radius:99px;
+      margin-top:6px;
+      overflow:hidden;
+    }
+    .progress-fill {
+      height:100%;
+      border-radius:99px;
+      background:#3b82f6;
+    }
+    .badge {
+      font-size:11px;
+      padding:3px 8px;
+      border-radius:99px;
+      font-weight:600;
+    }
+    .chip { background:#f3f4f6; color:#374151; padding:4px 12px; border-radius:99px; font-size:12px; display:inline-block; margin:3px 3px 0 0; }
+    .admin-actions { margin-top:14px; display:flex; gap:8px; flex-wrap:wrap; }
+    .admin-actions .btn {
+      padding:8px 14px;
+      border-radius:10px;
+      font-size:13px;
+      font-weight:500;
+      border:none;
+      cursor:pointer;
+      background:#f3f4f6;
+      transition:0.2s;
+    }
+    .admin-actions .btn:hover { background:#e5e7eb; }
+    .admin-actions .btn-primary { background:#1a1a2e; color:#fff; }
+    .admin-actions .btn-primary:hover { background:#2d2d4e; }
+    .inline-icon { margin-right:6px; }
+  </style>
+</head>
+<body>
+<div class="dashboard">
+  <div class="dash-header">
+    <div>
+      <h1>Dashboard</h1>
+      <div class="date">Thu, Jun 12 · Updated 2 min ago</div>
+    </div>
+    <i class="fas fa-bell" style="font-size:20px;color:#6b7280;"></i>
+  </div>
+
+  <!-- row 1: stats -->
+  <div class="row">
+    <div class="widget">
+      <div class="widget-title"><i class="fas fa-building inline-icon"></i>Total Listings</div>
+      <div class="stat-number">147</div>
+      <div class="stat-change stat-up"><i class="fas fa-arrow-up"></i> +12 this week</div>
+    </div>
+    <div class="widget">
+      <div class="widget-title"><i class="fas fa-eye inline-icon"></i>Active Views</div>
+      <div class="stat-number">2.4k</div>
+      <div class="stat-change stat-up"><i class="fas fa-arrow-up"></i> +18% vs last week</div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="widget">
+      <div class="widget-title"><i class="fas fa-star inline-icon"></i>Avg Rating</div>
+      <div class="stat-number">4.8</div>
+      <div class="stat-change stat-up"><i class="fas fa-arrow-up"></i> +0.2</div>
+    </div>
+    <div class="widget">
+      <div class="widget-title"><i class="fas fa-clock inline-icon"></i>Avg Response</div>
+      <div class="stat-number">3m</div>
+      <div class="stat-change stat-down"><i class="fas fa-arrow-down"></i> +30s vs target</div>
+    </div>
+  </div>
+
+  <!-- row 2: recent listings -->
+  <div class="widget widget-full">
+    <div class="widget-title"><i class="fas fa-list inline-icon"></i>Recent Listings</div>
+    <div class="listing-item">
+      <div class="listing-img" style="background:#dbeafe;"></div>
+      <div class="listing-info">
+        <div class="listing-name">Modern Studio</div>
+        <div class="listing-addr">123 Main St · 2h ago</div>
+      </div>
+      <div class="listing-price">$1,200</div>
+      <span class="badge" style="background:#dcfce7;color:#16a34a;">Active</span>
+    </div>
+    <div class="listing-item">
+      <div class="listing-img" style="background:#fef3c7;"></div>
+      <div class="listing-info">
+        <div class="listing-name">2BR Downtown</div>
+        <div class="listing-addr">456 Oak Ave · 5h ago</div>
+      </div>
+      <div class="listing-price">$2,400</div>
+      <span class="badge" style="background:#fef3c7;color:#d97706;">Pending</span>
+    </div>
+    <div class="listing-item">
+      <div class="listing-img" style="background:#fce4ec;"></div>
+      <div class="listing-info">
+        <div class="listing-name">Co-living Space</div>
+        <div class="listing-addr">789 Pine Rd · 1d ago</div>
+      </div>
+      <div class="listing-price">$850</div>
+      <span class="badge" style="background:#fee2e2;color:#dc2626;">Expiring</span>
+    </div>
+  </div>
+
+  <!-- row 3: occupancy + tags -->
+  <div class="row">
+    <div class="widget">
+      <div class="widget-title"><i class="fas fa-door-open inline-icon"></i>Occupancy Rate</div>
+      <div class="stat-number">87%</div>
+      <div class="progress-bar"><div class="progress-fill" style="width:87%"></div></div>
+      <div class="stat-change stat-up" style="margin-top:6px;">Target: 92%</div>
+    </div>
+    <div class="widget">
+      <div class="widget-title"><i class="fas fa-tags inline-icon"></i>Popular Tags</div>
+      <div>
+        <span class="chip">Pet-friendly</span>
+        <span class="chip">Balcony</span>
+        <span class="chip">Parking</span>
+        <span class="chip">Furnished</span>
+        <span class="chip">Gym</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- admin actions -->
+  <div class="widget widget-full">
+    <div class="widget-title"><i class="fas fa-cog inline-icon"></i>Quick Actions</div>
+    <div class="admin-actions">
+      <button class="btn btn-primary"><i class="fas fa-plus"></i> Add Listing</button>
+      <button class="btn"><i class="fas fa-users"></i> Manage Tenants</button>
+      <button class="btn"><i class="fas fa-file-export"></i> Export Report</button>
+      <button class="btn"><i class="fas fa-sliders-h"></i> Settings</button>
+    </div>
+  </div>
+</div>
+</body>
+</html>
