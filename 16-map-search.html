@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartRental Scout – Map Search</title>
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family:'Inter',sans-serif;
+      background:#f4f6fa;
+      color:#1a1a2e;
+    }
+    #map {
+      width:100%;
+      height:60vh;
+      border-radius:0 0 24px 24px;
+      z-index:0;
+    }
+    .search-overlay {
+      position:relative;
+      z-index:1000;
+      padding:16px 16px 0;
+      margin-top:-48px;
+    }
+    .search-box {
+      background:#fff;
+      border-radius:16px;
+      padding:12px 16px;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      box-shadow:0 8px 24px rgba(0,0,0,0.10);
+    }
+    .search-box input {
+      flex:1;
+      border:none;
+      outline:none;
+      font-size:15px;
+      font-family:'Inter',sans-serif;
+    }
+    .search-box input::placeholder { color:#9ca3af; }
+    .search-box button {
+      background:#1a1a2e;
+      color:#fff;
+      border:none;
+      border-radius:12px;
+      padding:8px 16px;
+      font-weight:600;
+      font-size:13px;
+      cursor:pointer;
+    }
+    .filter-chips {
+      display:flex;
+      gap:8px;
+      margin-top:12px;
+      overflow-x:auto;
+      padding-bottom:4px;
+    }
+    .chip {
+      white-space:nowrap;
+      background:#fff;
+      border:1px solid #e5e7eb;
+      padding:6px 14px;
+      border-radius:99px;
+      font-size:12px;
+      font-weight:500;
+      cursor:pointer;
+      transition:0.15s;
+    }
+    .chip.active { background:#1a1a2e; color:#fff; border-color:#1a1a2e; }
+    .chip i { margin-right:4px; }
+    .results {
+      padding:16px;
+      max-width:700px;
+      margin:0 auto;
+    }
+    .result-header {
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:12px;
+    }
+    .result-header h2 { font-size:18px; }
+    .result-header span { font-size:13px; color:#6b7280; }
+    .result-card {
+      background:#fff;
+      border-radius:16px;
+      padding:14px 16px;
+      display:flex;
+      gap:14px;
+      margin-bottom:10px;
+      box-shadow:0 4px 12px rgba(0,0,0,0.04);
+      cursor:pointer;
+      transition:0.15s;
+    }
+    .result-card:hover { box-shadow:0 6px 20px rgba(0,0,0,0.08); }
+    .result-thumb {
+      width:70px;height:70px;
+      border-radius:12px;
+      background:#e5e7eb;
+      flex-shrink:0;
+    }
+    .result-body { flex:1; }
+    .result-title { font-weight:600; font-size:15px; }
+    .result-addr { font-size:13px; color:#6b7280; margin:2px 0 4px; }
+    .result-footer {
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+    }
+    .result-price { font-weight:700; font-size:16px; }
+    .result-detail { font-size:12px; color:#6b7280; }
+    .badge {
+      font-size:11px;
+      padding:3px 8px;
+      border-radius:99px;
+      font-weight:600;
+    }
+    .badge-green { background:#dcfce7; color:#16a34a; }
+  </style>
+</head>
+<body>
+<!-- Map container -->
+<div id="map"></div>
+
+<!-- Search overlay -->
+<div class="search-overlay">
+  <div class="search-box">
+    <i class="fas fa-search" style="color:#9ca3af;"></i>
+    <input type="text" placeholder="Search neighborhoods, addresses, landmarks…">
+    <button><i class="fas fa-sliders-h" style="margin-right:6px;"></i> Filters</button>
+  </div>
+  <div class="filter-chips">
+    <span class="chip active"><i class="fas fa-home"></i> All</span>
+    <span class="chip"><i class="fas fa-tag"></i> Under $1,000</span>
+    <span class="chip"><i class="fas fa-dog"></i> Pet-friendly</span>
+    <span class="chip"><i class="fas fa-parking"></i> Parking</span>
+    <span class="chip"><i class="fas fa-wifi"></i> WiFi</span>
+    <span class="chip"><i class="fas fa-calendar"></i> Available Now</span>
+  </div>
+</div>
+
+<!-- Results list -->
+<div class="results">
+  <div class="result-header">
+    <h2>Nearby Listings</h2>
+    <span><i class="fas fa-location-dot" style="margin-right:4px;"></i> Nairobi</span>
+  </div>
+
+  <div class="result-card">
+    <div class="result-thumb" style="background:#dbeafe;"></div>
+    <div class="result-body">
+      <div class="result-title">Modern Studio Apartment</div>
+      <div class="result-addr"><i class="fas fa-map-pin" style="margin-right:4px;color:#9ca3af;"></i> Kilimani, Nairobi</div>
+      <div class="result-footer">
+        <span class="result-price">$950</span>
+        <span class="result-detail"><i class="far fa-heart" style="margin-right:4px;"></i> 2.3 km · <span class="badge badge-green">Available</span></span>
+      </div>
+    </div>
+  </div>
+  <div class="result-card">
+    <div class="result-thumb" style="background:#fef3c7;"></div>
+    <div class="result-body">
+      <div class="result-title">2BR Apartment with Balcony</div>
+      <div class="result-addr"><i class="fas fa-map-pin" style="margin-right:4px;color:#9ca3af;"></i> Westlands, Nairobi</div>
+      <div class="result-footer">
+        <span class="result-price">$1,800</span>
+        <span class="result-detail"><i class="far fa-heart" style="margin-right:4px;"></i> 4.1 km · <span class="badge badge-green">Available</span></span>
+      </div>
+    </div>
+  </div>
+  <div class="result-card">
+    <div class="result-thumb" style="background:#fce4ec;"></div>
+    <div class="result-body">
+      <div class="result-title">Co-living Space (Shared)</div>
+      <div class="result-addr"><i class="fas fa-map-pin" style="margin-right:4px;color:#9ca3af;"></i> South B, Nairobi</div>
+      <div class="result-footer">
+        <span class="result-price">$650</span>
+        <span class="result-detail"><i class="far fa-heart" style="margin-right:4px;"></i> 5.0 km · <span class="badge badge-green">Available</span></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script>
+  const map = L.map('map').setView([-1.286389, 36.817223], 12);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    maxZoom: 18
+  }).addTo(map);
+  // Sample markers
+  const markers = [
+    { coords: [-1.275, 36.800], label: 'Modern Studio · $950' },
+    { coords: [-1.265, 36.810], label: '2BR Balcony · $1,800' },
+    { coords: [-1.295, 36.830], label: 'Co-living · $650' }
+  ];
+  markers.forEach(m => {
+    L.marker(m.coords).addTo(map).bindPopup(m.label);
+  });
+</script>
+</body>
+</html>
