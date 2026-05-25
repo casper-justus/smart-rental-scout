@@ -1,0 +1,252 @@
+<!DOCTYPE html><html class="light" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>TenantMatch - Profile</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary": "#006b5f",
+                        "on-secondary-fixed-variant": "#005047",
+                        "error-container": "#ffdad6",
+                        "tertiary": "#07182b",
+                        "tertiary-container": "#1d2d41",
+                        "on-tertiary-fixed": "#0b1c30",
+                        "secondary-fixed-dim": "#3cddc7",
+                        "outline-variant": "#c5c6cf",
+                        "background": "#f7f9fb",
+                        "inverse-surface": "#2d3133",
+                        "surface": "#f7f9fb",
+                        "on-secondary-container": "#007165",
+                        "on-primary-fixed": "#071b3b",
+                        "on-surface": "#191c1e",
+                        "on-background": "#191c1e",
+                        "secondary-container": "#62fae3",
+                        "primary-fixed": "#d8e2ff",
+                        "surface-bright": "#f7f9fb",
+                        "surface-container-lowest": "#ffffff",
+                        "tertiary-fixed-dim": "#b7c8e1",
+                        "on-error-container": "#93000a",
+                        "on-surface-variant": "#44474e",
+                        "on-tertiary-container": "#8494ac",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "surface-container": "#eceef0",
+                        "on-primary-container": "#8293ba",
+                        "tertiary-fixed": "#d3e4fe",
+                        "primary-fixed-dim": "#b6c6f0",
+                        "error": "#ba1a1a",
+                        "on-tertiary-fixed-variant": "#38485d",
+                        "on-primary-fixed-variant": "#364669",
+                        "secondary-fixed": "#62fae3",
+                        "surface-container-low": "#f2f4f6",
+                        "surface-variant": "#e0e3e5",
+                        "inverse-primary": "#b6c6f0",
+                        "primary": "#031636",
+                        "outline": "#75777f",
+                        "on-error": "#ffffff",
+                        "inverse-on-surface": "#eff1f3",
+                        "surface-container-highest": "#e0e3e5",
+                        "on-primary": "#ffffff",
+                        "surface-container-high": "#e6e8ea",
+                        "on-secondary-fixed": "#00201c",
+                        "primary-container": "#1a2b4c",
+                        "surface-tint": "#4e5e82",
+                        "surface-dim": "#d8dadc"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-md": "16px",
+                        "base": "8px",
+                        "stack-sm": "4px",
+                        "gutter": "12px",
+                        "container-margin": "20px",
+                        "stack-lg": "24px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "data-display": ["Inter"],
+                        "label-caps": ["Inter"],
+                        "body-md": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "headline-sm": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "data-display": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+                        "label-caps": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-lg-mobile": ["26px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+                        "headline-sm": ["16px", { "lineHeight": "24px", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        
+        .shadow-soft {
+            box-shadow: 0 4px 12px rgba(3, 22, 54, 0.04);
+        }
+
+        /* Custom Toggle Switch Styles */
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #2DD4BF;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #2DD4BF;
+        }
+        .toggle-checkbox {
+            right: 0;
+            z-index: 1;
+            border-color: #e2e8f0;
+            transition: all 0.3s;
+        }
+        .toggle-label {
+            background-color: #e2e8f0;
+            border-radius: 9999px;
+            transition: all 0.3s;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background dark:bg-gray-950 antialiased min-h-screen pb-24 font-body-md">
+<a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[100] focus:bg-primary-container focus:text-white focus:px-4 focus:py-2 focus:rounded-full focus:outline-none">Skip to main content</a>
+<!-- TopAppBar -->
+<header class="w-full top-0 sticky bg-surface dark:bg-on-surface border-b border-outline-variant dark:border-on-tertiary-fixed-variant z-40" role="banner">
+<div class="flex items-center justify-between px-container-margin h-16 w-full">
+<button class="text-on-surface-variant dark:text-on-tertiary-container hover:bg-surface-container-low dark:hover:bg-tertiary-container transition-colors active:scale-95 transition-transform p-2 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+</button>
+<div class="flex items-center gap-3">
+<svg class="w-8 h-8 flex-shrink-0" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="TenantMatch">
+  <rect width="32" height="32" rx="8" fill="#62fae3"/>
+  <path d="M16 5L4 16h3v11h8V18h2v9h8V16h3L16 5z" fill="#031636"/>
+</svg>
+<h1 class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed-dim">Profile</h1>
+</div>
+<button onclick="toggleDarkMode()" class="p-2 hover:bg-surface-container-low dark:hover:bg-tertiary-container transition-colors rounded-full text-primary dark:text-primary-fixed active:scale-95 duration-150" aria-label="Toggle dark mode">
+  <span class="material-symbols-outlined" id="darkModeIcon">dark_mode</span>
+</button>
+<button class="text-on-surface-variant dark:text-on-tertiary-container hover:bg-surface-container-low dark:hover:bg-tertiary-container transition-colors active:scale-95 transition-transform p-2 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="check">check</span>
+</button>
+</div>
+</header>
+<main id="main-content" class="max-w-3xl mx-auto px-container-margin py-stack-lg space-y-stack-lg">
+<!-- Profile Picture Section -->
+<section class="flex flex-col items-center justify-center pt-base">
+<div class="relative">
+<div class="w-32 h-32 rounded-full overflow-hidden border-4 border-surface-container-lowest shadow-soft">
+<img alt="Profile Picture" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuASuMM1eepw3aew2Xnx0X3f56yqxZSsbO98iVLebEaug2Y8ORsTmbl-mmo1ujv1WTO3KAzaptM_fleT1JjRlr7hvLn4Rdq5GOYQxuyE8onyzCKyEqkTFfb93uAA0F2J3Q4WmRPBczq6Nda6z_amlAgalT7vI63KTdZr72Fy2fVnP3bkkx9mCXYy__bUdeV3SipW1fKa79kixskFb0lRTDj9C_y4FoVWSSo9RKLc9uaGrv_X-o1o7LZGc5fPw2CzVvgTUFDPh5z51eM">
+</div>
+<button class="absolute bottom-0 right-0 bg-primary-container text-on-primary p-2 rounded-full shadow-md hover:bg-tertiary-container transition-colors border-2 border-surface-container-lowest flex items-center justify-center active:scale-95">
+<span class="material-symbols-outlined text-[20px]" data-icon="edit">edit</span>
+</button>
+</div>
+<h2 class="mt-stack-md font-headline-md text-headline-md text-primary dark:text-gray-100">Jane Doe</h2>
+<p class="font-body-md text-body-md text-on-surface-variant dark:text-gray-400">Looking in Downtown Area</p>
+</section>
+<!-- Personal Information Section -->
+<section class="bg-surface-container-lowest dark:bg-gray-900 rounded-xl shadow-soft p-stack-lg space-y-stack-md border border-outline-variant/30 dark:border-gray-700">
+<h3 class="font-headline-sm text-headline-sm text-primary dark:text-gray-100 border-b border-surface-variant pb-base">Personal Information</h3>
+<div class="space-y-base">
+<label class="block font-label-caps text-label-caps text-on-surface-variant dark:text-gray-400 uppercase tracking-wider" for="fullName">Full Name</label>
+<input class="w-full bg-surface-bright dark:bg-gray-800 border border-surface-variant dark:border-gray-600 rounded-lg px-4 py-3 font-body-lg text-body-lg text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-secondary-fixed-dim transition-all" id="fullName" type="text" value="Jane Doe">
+</div>
+<div class="space-y-base">
+<label class="block font-label-caps text-label-caps text-on-surface-variant dark:text-gray-400 uppercase tracking-wider" for="email">Email Address</label>
+<input class="w-full bg-surface-bright dark:bg-gray-800 border border-surface-variant dark:border-gray-600 rounded-lg px-4 py-3 font-body-lg text-body-lg text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-secondary-fixed-dim transition-all" id="email" type="email" value="jane@example.com">
+</div>
+<div class="space-y-base">
+<label class="block font-label-caps text-label-caps text-on-surface-variant dark:text-gray-400 uppercase tracking-wider" for="phone">Phone Number</label>
+<input class="w-full bg-surface-bright dark:bg-gray-800 border border-surface-variant dark:border-gray-600 rounded-lg px-4 py-3 font-body-lg text-body-lg text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-secondary-fixed-dim transition-all" id="phone" placeholder="(555) 123-4567" type="tel">
+</div>
+</section>
+<!-- Matching Preferences Section -->
+<section class="bg-surface-container-lowest dark:bg-gray-900 rounded-xl shadow-soft p-stack-lg space-y-stack-md border border-outline-variant/30 dark:border-gray-700 border-t-[3px] border-t-secondary-fixed-dim">
+<h3 class="font-headline-sm text-headline-sm text-primary dark:text-gray-100 border-b border-surface-variant pb-base">Matching Preferences</h3>
+<div class="space-y-stack-md pt-base">
+<!-- Toggles -->
+<div class="flex items-center justify-between py-2">
+<span class="font-body-lg text-body-lg text-on-surface font-medium">Pet Friendly</span>
+<div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
+<input checked="" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer checked:right-0 checked:border-secondary" id="toggle_pet" name="toggle_pet" type="checkbox">
+<label class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer" for="toggle_pet"></label>
+</div>
+</div>
+<div class="flex items-center justify-between py-2">
+<span class="font-body-lg text-body-lg text-on-surface font-medium">In-unit Laundry</span>
+<div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
+<input checked="" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer checked:right-0 checked:border-secondary" id="toggle_laundry" name="toggle_laundry" type="checkbox">
+<label class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer" for="toggle_laundry"></label>
+</div>
+</div>
+<div class="flex items-center justify-between py-2">
+<span class="font-body-lg text-body-lg text-on-surface font-medium">Near Metro</span>
+<div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
+<input class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer" id="toggle_metro" name="toggle_metro" type="checkbox">
+<label class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer" for="toggle_metro"></label>
+</div>
+</div>
+<!-- Slider -->
+<div class="pt-stack-md border-t border-surface-variant">
+<div class="flex justify-between items-center mb-base">
+<label class="font-label-caps text-label-caps text-on-surface-variant dark:text-gray-400 uppercase tracking-wider">Price Range</label>
+<span class="font-body-md text-body-md text-primary dark:text-gray-100 font-bold">$1,500 - $2,500</span>
+</div>
+<input class="w-full h-2 bg-surface-variant rounded-lg appearance-none cursor-pointer accent-secondary" max="5000" min="1000" type="range" value="2500">
+</div>
+</div>
+</section>
+<!-- Action Button -->
+<div class="pt-stack-md pb-stack-lg">
+<button class="w-full bg-primary-container text-on-primary font-headline-sm text-headline-sm py-4 rounded-lg shadow-md hover:bg-tertiary-container transition-colors active:scale-[0.98] flex items-center justify-center gap-2">
+                Save Changes
+            </button>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-center bg-surface dark:bg-gray-950 px-gutter pb-stack-md pt-base z-50 rounded-t-xl border-t border-outline-variant dark:border-gray-700 shadow-lg">
+<a href="15-home-page.html" class="flex flex-col items-center justify-center text-on-surface-variant dark:text-gray-400 px-4 py-1 hover:bg-surface-container-low active:scale-90 transition-transform duration-200 rounded-xl">
+<span class="material-symbols-outlined" aria-hidden="true">home</span>
+<span class="font-label-caps text-label-caps mt-1">Home</span>
+</a>
+<a href="16-map-search.html" class="flex flex-col items-center justify-center text-on-surface-variant dark:text-gray-400 px-4 py-1 hover:bg-surface-container-low active:scale-90 transition-transform duration-200 rounded-xl">
+<span class="material-symbols-outlined" aria-hidden="true">search</span>
+<span class="font-label-caps text-label-caps mt-1">Search</span>
+</a>
+<a href="14-saved-searches.html" class="flex flex-col items-center justify-center text-on-surface-variant dark:text-gray-400 px-4 py-1 hover:bg-surface-container-low active:scale-90 transition-transform duration-200 rounded-xl">
+<span class="material-symbols-outlined" aria-hidden="true">favorite</span>
+<span class="font-label-caps text-label-caps mt-1">Saved</span>
+</a>
+<a href="05-user-profile.html" class="flex flex-col items-center justify-center bg-secondary-container dark:bg-gray-800 text-on-secondary-container rounded-xl px-4 py-1 active:scale-90 transition-transform duration-200" aria-current="page">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;" aria-hidden="true">person</span>
+<span class="font-label-caps text-label-caps mt-1">Profile</span>
+</a>
+</nav>
+
+
+  <script src="app.js"></script>
+</body></html>
