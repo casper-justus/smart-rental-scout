@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>TenantMatch Application - Background &amp; References</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #e2e8f0;
+            border-radius: 10px;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-tint": "#4e5e82",
+                        "surface-container-highest": "#e0e3e5",
+                        "on-secondary-container": "#007165",
+                        "background": "#f7f9fb",
+                        "primary": "#031636",
+                        "on-tertiary-container": "#8494ac",
+                        "surface-container-high": "#e6e8ea",
+                        "on-secondary": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "tertiary-fixed": "#d3e4fe",
+                        "tertiary-container": "#1d2d41",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary-fixed-variant": "#364669",
+                        "surface-container-low": "#f2f4f6",
+                        "error": "#ba1a1a",
+                        "on-secondary-fixed": "#00201c",
+                        "outline-variant": "#c5c6cf",
+                        "secondary-container": "#62fae3",
+                        "primary-container": "#1a2b4c",
+                        "surface": "#f7f9fb",
+                        "primary-fixed-dim": "#b6c6f0",
+                        "on-surface": "#191c1e",
+                        "on-primary-container": "#8293ba",
+                        "tertiary-fixed-dim": "#b7c8e1",
+                        "on-surface-variant": "#44474e",
+                        "on-error": "#ffffff",
+                        "secondary": "#006b5f",
+                        "on-secondary-fixed-variant": "#005047",
+                        "outline": "#75777f",
+                        "inverse-primary": "#b6c6f0",
+                        "on-primary-fixed": "#071b3b",
+                        "error-container": "#ffdad6",
+                        "on-tertiary-fixed-variant": "#38485d",
+                        "secondary-fixed": "#62fae3",
+                        "on-tertiary-fixed": "#0b1c30",
+                        "surface-variant": "#e0e3e5",
+                        "surface-dim": "#d8dadc",
+                        "inverse-on-surface": "#eff1f3",
+                        "on-background": "#191c1e",
+                        "tertiary": "#07182b",
+                        "surface-bright": "#f7f9fb",
+                        "on-primary": "#ffffff",
+                        "primary-fixed": "#d8e2ff",
+                        "secondary-fixed-dim": "#3cddc7",
+                        "on-tertiary": "#ffffff",
+                        "surface-container": "#eceef0",
+                        "inverse-surface": "#2d3133"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-md": "16px",
+                        "container-margin": "20px",
+                        "base": "8px",
+                        "stack-lg": "24px",
+                        "stack-sm": "4px",
+                        "gutter": "12px"
+                    },
+                    "fontFamily": {
+                        "headline-lg-mobile": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "label-caps": ["Inter"],
+                        "headline-sm": ["Inter"],
+                        "body-md": ["Inter"],
+                        "data-display": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "headline-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-lg-mobile": ["26px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "headline-sm": ["16px", {"lineHeight": "24px", "fontWeight": "600"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "data-display": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                        "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background dark:bg-gray-950 min-h-screen pb-24">
+<a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[100] focus:bg-primary-container focus:text-white focus:px-4 focus:py-2 focus:rounded-full focus:outline-none">Skip to main content</a>
+<!-- Top Navigation Bar -->
+<header class="w-full sticky top-0 z-40 bg-surface dark:bg-surface-dim border-b border-outline-variant dark:border-outline shadow-sm flex items-center justify-between px-container-margin py-base w-full max-w-full" role="banner">
+<div class="flex items-center gap-base">
+<svg class="w-8 h-8 flex-shrink-0" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="TenantMatch">
+      <rect width="32" height="32" rx="8" fill="#62fae3"/>
+      <path d="M16 5L4 16h3v11h8V18h2v9h8V16h3L16 5z" fill="#031636"/>
+    </svg>
+<h1 class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed">TenantMatch</h1>
+</div>
+<div class="flex items-center gap-gutter">
+<a href="05-user-profile.html" class="w-8 h-8 rounded-full overflow-hidden border border-outline-variant dark:border-gray-700 flex-shrink-0">
+<img alt="User Profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida/ADBb0ugPQN-KS7toteZ5y8vPe7S70ye0JN7pk3goY7ebht46oprOZQOEVqAXFfx5IOIM9x38WbeTrk_6nMxGy-0mwR37ts6WgOJVXMMcSoujerYea61dDlHzP-GAlzp9_cVZbQYUPkf-tWHt96a_p4kGbbFuT4krOsvLxoATaaGH5IK1kcyM1tD4LC7LppzwMPUiv_0E94-r2ucqc1ggrrFPTTRQ4pG11XG9T6t2GYExUTcVuLTGy6a5E5G6fR8">
+</a>
+<button onclick="toggleDarkMode()" class="p-2 hover:bg-surface-container-low dark:hover:bg-gray-700 transition-colors rounded-full text-primary dark:text-primary-fixed active:scale-95 duration-150" aria-label="Toggle dark mode">
+  <span class="material-symbols-outlined" id="darkModeIcon">dark_mode</span>
+</button>
+<span class="material-symbols-outlined text-on-surface-variant dark:text-gray-400 hover:bg-surface-container-high transition-colors p-2 rounded-full cursor-pointer">notifications</span>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main id="main-content" class="max-w-2xl mx-auto px-container-margin pt-stack-lg flex flex-col gap-stack-lg">
+<!-- Progress Indicator -->
+<section class="flex flex-col gap-base">
+<div class="flex justify-between items-center">
+<span class="font-label-caps text-label-caps text-on-surface-variant dark:text-gray-400">Step 3 of 4</span>
+<span class="font-label-caps text-label-caps text-primary dark:text-gray-100">75% Complete</span>
+</div>
+<div class="w-full bg-surface-container-high dark:bg-gray-700 h-2 rounded-full overflow-hidden">
+<div class="bg-secondary h-full transition-all duration-700 ease-out" style="width: 75%;"></div>
+</div>
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg text-primary dark:text-gray-100 mt-stack-sm">Background &amp; References</h2>
+<p class="font-body-md text-body-md text-on-surface-variant dark:text-gray-400">We use this information to verify your suitability for the premium listings in our ecosystem.</p>
+</section>
+<!-- Background Check Section -->
+<section class="bg-surface-container-lowest dark:bg-gray-900 rounded-xl p-stack-md border border-outline-variant dark:border-gray-700 shadow-sm flex flex-col gap-stack-md">
+<div class="flex items-start justify-between gap-gutter">
+<div class="flex-1">
+<h3 class="font-headline-sm text-headline-sm text-primary dark:text-gray-100">Background Check Authorization</h3>
+<p class="font-body-md text-body-md text-on-surface-variant dark:text-gray-400 mt-stack-sm leading-relaxed">
+                        Authorize a comprehensive screening including credit history, criminal records, and eviction reports. This is a soft inquiry and won't impact your credit score.
+                    </p>
+</div>
+<div class="relative inline-flex items-center cursor-pointer pt-2">
+<input class="sr-only peer" id="auth-toggle" type="checkbox"/>
+<div class="w-11 h-6 bg-surface-container-highest dark:bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[10px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-secondary"></div>
+</div>
+</div>
+<div class="bg-surface-container-low p-base rounded-lg border-l-4 border-secondary flex gap-gutter">
+<span class="material-symbols-outlined text-secondary text-[20px]" aria-hidden="true">verified_user</span>
+<p class="font-label-caps text-label-caps text-on-secondary-fixed-variant">Authorized by GlobalTrust Security</p>
+</div>
+</section>
+<!-- References Form Section -->
+<section class="flex flex-col gap-stack-md">
+<div class="flex justify-between items-end">
+<div>
+<h3 class="font-headline-sm text-headline-sm text-primary dark:text-gray-100">Professional &amp; Personal References</h3>
+<p class="font-body-md text-body-md text-on-surface-variant dark:text-gray-400">Please provide at least two reliable references.</p>
+</div>
+<button class="flex items-center gap-stack-sm font-label-caps text-label-caps text-secondary hover:bg-secondary-container/20 px-3 py-2 rounded-lg transition-colors active:scale-95 duration-150">
+<span class="material-symbols-outlined text-[18px]" aria-hidden="true">add</span>
+                    Add Reference
+                </button>
+</div>
+<!-- Reference Cards Grid -->
+<div class="grid grid-cols-1 gap-gutter" id="references-container">
+<!-- Reference 1 -->
+<div class="bg-white dark:bg-gray-900 border border-outline-variant dark:border-gray-700 rounded-xl p-stack-md shadow-sm flex flex-col gap-stack-md">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-stack-md">
+<div class="flex flex-col gap-stack-sm">
+<label class="font-label-caps text-label-caps text-on-surface-variant dark:text-gray-400 uppercase">Full Name</label>
+<input class="w-full bg-white dark:bg-gray-800 border border-outline-variant dark:border-gray-600 rounded-lg px-stack-md py-base font-body-md text-body-md focus:outline-none focus:border-primary focus:ring-1 focus:ring-secondary/30 transition-all" placeholder="e.g. Sarah Jenkins" type="text"/>
+</div>
+<div class="flex flex-col gap-stack-sm">
+<label class="font-label-caps text-label-caps text-on-surface-variant dark:text-gray-400 uppercase">Relationship</label>
+<select class="w-full bg-white dark:bg-gray-800 border border-outline-variant dark:border-gray-600 rounded-lg px-stack-md py-base font-body-md text-body-md focus:outline-none focus:border-primary focus:ring-1 focus:ring-secondary/30 transition-all appearance-none">
+<option>Professional / Manager</option>
+<option>Personal Friend</option>
+<option>Former Landlord</option>
+<option>Colleague</option>
+</select>
+</div>
+</div>
+<div class="flex flex-col gap-stack-sm">
+<label class="font-label-caps text-label-caps text-on-surface-variant dark:text-gray-400 uppercase">Phone Number</label>
+<div class="relative">
+<input class="w-full bg-white dark:bg-gray-800 border border-outline-variant dark:border-gray-600 rounded-lg pl-10 pr-stack-md py-base font-body-md text-body-md focus:outline-none focus:border-primary focus:ring-1 focus:ring-secondary/30 transition-all" placeholder="+1 (555) 000-0000" type="tel"/>
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant dark:text-gray-400 text-[18px]" aria-hidden="true">call</span>
+</div>
+</div>
+</div>
+<!-- Reference 2 -->
+<div class="bg-white dark:bg-gray-900 border border-outline-variant dark:border-gray-700 rounded-xl p-stack-md shadow-sm flex flex-col gap-stack-md relative overflow-hidden">
+<div class="absolute top-0 right-0 p-2">
+<button class="text-error hover:bg-error-container p-1 rounded-md transition-colors"><span class="material-symbols-outlined text-[20px]">delete</span></button>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-stack-md">
+<div class="flex flex-col gap-stack-sm">
+<label class="font-label-caps text-label-caps text-on-surface-variant dark:text-gray-400 uppercase">Full Name</label>
+<input class="w-full bg-white dark:bg-gray-800 border border-outline-variant dark:border-gray-600 rounded-lg px-stack-md py-base font-body-md text-body-md focus:outline-none focus:border-primary focus:ring-1 focus:ring-secondary/30 transition-all" placeholder="e.g. David Chen" type="text"/>
+</div>
+<div class="flex flex-col gap-stack-sm">
+<label class="font-label-caps text-label-caps text-on-surface-variant dark:text-gray-400 uppercase">Relationship</label>
+<select class="w-full bg-white dark:bg-gray-800 border border-outline-variant dark:border-gray-600 rounded-lg px-stack-md py-base font-body-md text-body-md focus:outline-none focus:border-primary focus:ring-1 focus:ring-secondary/30 transition-all appearance-none">
+<option>Former Landlord</option>
+<option>Professional / Manager</option>
+<option>Personal Friend</option>
+<option>Colleague</option>
+</select>
+</div>
+</div>
+<div class="flex flex-col gap-stack-sm">
+<label class="font-label-caps text-label-caps text-on-surface-variant dark:text-gray-400 uppercase">Phone Number</label>
+<div class="relative">
+<input class="w-full bg-white dark:bg-gray-800 border border-outline-variant dark:border-gray-600 rounded-lg pl-10 pr-stack-md py-base font-body-md text-body-md focus:outline-none focus:border-primary focus:ring-1 focus:ring-secondary/30 transition-all" placeholder="+1 (555) 000-0000" type="tel"/>
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant dark:text-gray-400 text-[18px]" aria-hidden="true">call</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Action Buttons Footer -->
+<section class="flex flex-col md:flex-row gap-gutter mt-stack-lg border-t border-outline-variant dark:border-gray-700 pt-stack-lg mb-8">
+<a href="10-application-portal-step2.html" class="flex-1 border-2 border-primary text-primary dark:text-gray-100 font-headline-sm text-headline-sm py-3 rounded-lg hover:bg-surface-container-low transition-all active:scale-95 flex items-center justify-center gap-base order-2 md:order-1 no-underline"><span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>Back</a>
+<a href="12-application-portal-step4-review.html" onclick="saveFormData()" class="flex-[2] bg-primary text-on-primary font-headline-sm text-headline-sm py-3 rounded-lg hover:opacity-90 shadow-md transition-all active:scale-95 flex items-center justify-center gap-base order-1 md:order-2 no-underline">Save &amp; Continue<span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span></a>
+</section>
+</main>
+<!-- Bottom Navigation Bar -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-center bg-surface dark:bg-gray-950 px-gutter pb-stack-md pt-base z-50 rounded-t-xl border-t border-outline-variant dark:border-gray-700 shadow-lg">
+<a href="15-home-page.html" class="flex flex-col items-center justify-center text-on-surface-variant dark:text-gray-400 px-4 py-1 hover:bg-surface-container-low active:scale-90 transition-transform duration-200 rounded-xl">
+<span class="material-symbols-outlined" aria-hidden="true">home</span>
+<span class="font-label-caps text-label-caps mt-1">Home</span>
+</a>
+<a href="16-map-search.html" class="flex flex-col items-center justify-center text-on-surface-variant dark:text-gray-400 px-4 py-1 hover:bg-surface-container-low active:scale-90 transition-transform duration-200 rounded-xl">
+<span class="material-symbols-outlined" aria-hidden="true">search</span>
+<span class="font-label-caps text-label-caps mt-1">Search</span>
+</a>
+<a href="14-saved-searches.html" class="flex flex-col items-center justify-center text-on-surface-variant dark:text-gray-400 px-4 py-1 hover:bg-surface-container-low active:scale-90 transition-transform duration-200 rounded-xl">
+<span class="material-symbols-outlined" aria-hidden="true">favorite</span>
+<span class="font-label-caps text-label-caps mt-1">Saved</span>
+</a>
+<a href="05-user-profile.html" class="flex flex-col items-center justify-center text-on-surface-variant dark:text-gray-400 px-4 py-1 hover:bg-surface-container-low active:scale-90 transition-transform duration-200 rounded-xl">
+<span class="material-symbols-outlined" aria-hidden="true">person</span>
+<span class="font-label-caps text-label-caps mt-1">Profile</span>
+</a>
+</nav>
+<script>
+        // Micro-interaction for toggle feedback
+        const toggle = document.getElementById('auth-toggle');
+        toggle.addEventListener('change', function() {
+            const card = this.closest('section');
+            if(this.checked) {
+                card.classList.add('ring-2', 'ring-secondary/50');
+                setTimeout(() => card.classList.remove('ring-2'), 1000);
+            }
+        });
+
+        // Simple button active states handled by Tailwind active:scale-95
+    </script>
+  <script src="app.js"></script>
+</body></html>
