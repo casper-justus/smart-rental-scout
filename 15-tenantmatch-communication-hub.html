@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartRental Scout – Communication Hub</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family:'Inter',sans-serif;
+      background:#f4f6fa;
+      color:#1a1a2e;
+      padding:24px;
+    }
+    .hub {
+      max-width:700px;
+      margin:0 auto;
+    }
+    .hub-header {
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:20px;
+    }
+    .hub-header h1 { font-size:24px; }
+    .hub-header .badge {
+      background:#3b82f6;
+      color:#fff;
+      font-size:12px;
+      padding:4px 10px;
+      border-radius:99px;
+      font-weight:600;
+    }
+    .tabs {
+      display:flex;
+      gap:4px;
+      background:#eef2f6;
+      border-radius:14px;
+      padding:4px;
+      margin-bottom:18px;
+    }
+    .tab {
+      flex:1;
+      text-align:center;
+      padding:10px 0;
+      border-radius:12px;
+      font-size:14px;
+      font-weight:500;
+      cursor:pointer;
+      transition:0.2s;
+    }
+    .tab.active { background:#fff; box-shadow:0 2px 8px rgba(0,0,0,0.06); font-weight:600; }
+    .tab i { margin-right:6px; }
+    .conversation {
+      background:#fff;
+      border-radius:18px;
+      overflow:hidden;
+      box-shadow:0 6px 18px rgba(0,0,0,0.04);
+    }
+    .conv-item {
+      display:flex;
+      align-items:center;
+      gap:12px;
+      padding:16px 18px;
+      border-bottom:1px solid #f3f4f6;
+      cursor:pointer;
+      transition:0.15s;
+    }
+    .conv-item:last-child { border-bottom:none; }
+    .conv-item:hover { background:#f9fafb; }
+    .avatar {
+      width:44px;height:44px;
+      border-radius:50%;
+      background:#e5e7eb;
+      display:flex;align-items:center;justify-content:center;
+      font-weight:700;color:#6b7280;
+      flex-shrink:0;
+    }
+    .avatar-online { position:relative; }
+    .avatar-online::after {
+      content:'';position:absolute;bottom:0;right:0;
+      width:12px;height:12px;
+      background:#22c55e;
+      border:2px solid #fff;
+      border-radius:50%;
+    }
+    .conv-body { flex:1; min-width:0; }
+    .conv-name {
+      display:flex;justify-content:space-between;
+      font-weight:600;font-size:14px;
+    }
+    .conv-name .time { font-weight:400; color:#9ca3af; font-size:12px; }
+    .conv-preview {
+      font-size:13px;color:#6b7280;
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    }
+    .unread-dot {
+      width:10px;height:10px;
+      background:#3b82f6;
+      border-radius:50%;
+      flex-shrink:0;
+    }
+    .compose-area {
+      margin-top:18px;
+      background:#fff;
+      border-radius:18px;
+      padding:16px 18px;
+      display:flex;
+      gap:12px;
+      align-items:center;
+      box-shadow:0 6px 18px rgba(0,0,0,0.04);
+    }
+    .compose-area input {
+      flex:1;
+      border:none;
+      outline:none;
+      font-size:14px;
+      font-family:'Inter',sans-serif;
+      padding:10px 0;
+    }
+    .compose-area input::placeholder { color:#9ca3af; }
+    .compose-area button {
+      background:#1a1a2e;
+      color:#fff;
+      border:none;
+      border-radius:12px;
+      padding:10px 18px;
+      font-weight:600;
+      font-size:14px;
+      cursor:pointer;
+      transition:0.2s;
+    }
+    .compose-area button:hover { background:#2d2d4e; }
+    .status-text { font-size:12px; color:#6b7280; margin-top:12px; text-align:center; }
+  </style>
+</head>
+<body>
+<div class="hub">
+  <div class="hub-header">
+    <div>
+      <h1><i class="fas fa-comments" style="margin-right:8px;color:#3b82f6;"></i>Messages</h1>
+    </div>
+    <span class="badge">3 Unread</span>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active"><i class="fas fa-envelope"></i> All</div>
+    <div class="tab"><i class="fas fa-user"></i> Tenants</div>
+    <div class="tab"><i class="fas fa-building"></i> Landlords</div>
+    <div class="tab"><i class="fas fa-flag"></i> Flagged</div>
+  </div>
+
+  <div class="conversation">
+    <div class="conv-item">
+      <div class="avatar avatar-online" style="background:#dbeafe;color:#2563eb;">AK</div>
+      <div class="conv-body">
+        <div class="conv-name">
+          <span>Aisha Kapoor</span>
+          <span class="time">2m ago</span>
+        </div>
+        <div class="conv-preview">Hi, I'd like to schedule a viewing for the 2BR downtown apartment. Is tomorrow at 3pm available?</div>
+      </div>
+      <div class="unread-dot"></div>
+    </div>
+    <div class="conv-item">
+      <div class="avatar" style="background:#fef3c7;color:#d97706;">JM</div>
+      <div class="conv-body">
+        <div class="conv-name">
+          <span>James Mwangi</span>
+          <span class="time">1h ago</span>
+        </div>
+        <div class="conv-preview">Thanks for the update. We've reviewed the lease terms and would like to proceed. Please send the...</div>
+      </div>
+    </div>
+    <div class="conv-item">
+      <div class="avatar avatar-online" style="background:#fce4ec;color:#e11d48;">LG</div>
+      <div class="conv-body">
+        <div class="conv-name">
+          <span>Linda Githaiga</span>
+          <span class="time">3h ago</span>
+        </div>
+        <div class="conv-preview">The maintenance request for the plumbing issue has been resolved. The tenant confirmed everything...</div>
+      </div>
+    </div>
+    <div class="conv-item">
+      <div class="avatar" style="background:#e0f2fe;color:#0284c7;">PO</div>
+      <div class="conv-body">
+        <div class="conv-name">
+          <span>Peter Ochieng</span>
+          <span class="time">Yesterday</span>
+        </div>
+        <div class="conv-preview">Are there any pet-friendly units available in the Riverside area? My budget is around $1,000...</div>
+      </div>
+    </div>
+    <div class="conv-item">
+      <div class="avatar" style="background:#ede9fe;color:#7c3aed;">SN</div>
+      <div class="conv-body">
+        <div class="conv-name">
+          <span>Sarah Nyambura</span>
+          <span class="time">Yesterday</span>
+        </div>
+        <div class="conv-preview">Reminder: Rent is due in 3 days. Please find attached the invoice for June. Let me know if you...</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="compose-area">
+    <i class="fas fa-plus-circle" style="font-size:22px;color:#9ca3af;cursor:pointer;"></i>
+    <input type="text" placeholder="Type a message or search conversations…">
+    <button><i class="fas fa-paper-plane" style="margin-right:6px;"></i> Send</button>
+  </div>
+  <div class="status-text"><i class="fas fa-shield-alt" style="margin-right:4px;"></i> End-to-end encrypted · 5 conversations</div>
+</div>
+</body>
+</html>
