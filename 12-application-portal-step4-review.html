@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>TenantMatch - Review &amp; Submit</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(8px);
+            border: 1px solid #E2E8F0;
+        }
+    </style>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-tint": "#4e5e82",
+                    "surface-container-highest": "#e0e3e5",
+                    "on-secondary-container": "#007165",
+                    "background": "#f7f9fb",
+                    "primary": "#031636",
+                    "on-tertiary-container": "#8494ac",
+                    "surface-container-high": "#e6e8ea",
+                    "on-secondary": "#ffffff",
+                    "on-error-container": "#93000a",
+                    "tertiary-fixed": "#d3e4fe",
+                    "tertiary-container": "#1d2d41",
+                    "surface-container-lowest": "#ffffff",
+                    "on-primary-fixed-variant": "#364669",
+                    "surface-container-low": "#f2f4f6",
+                    "error": "#ba1a1a",
+                    "on-secondary-fixed": "#00201c",
+                    "outline-variant": "#c5c6cf",
+                    "secondary-container": "#62fae3",
+                    "primary-container": "#1a2b4c",
+                    "surface": "#f7f9fb",
+                    "primary-fixed-dim": "#b6c6f0",
+                    "on-surface": "#191c1e",
+                    "on-primary-container": "#8293ba",
+                    "tertiary-fixed-dim": "#b7c8e1",
+                    "on-surface-variant": "#44474e",
+                    "on-error": "#ffffff",
+                    "secondary": "#006b5f",
+                    "on-secondary-fixed-variant": "#005047",
+                    "outline": "#75777f",
+                    "inverse-primary": "#b6c6f0",
+                    "on-primary-fixed": "#071b3b",
+                    "error-container": "#ffdad6",
+                    "on-tertiary-fixed-variant": "#38485d",
+                    "secondary-fixed": "#62fae3",
+                    "on-tertiary-fixed": "#0b1c30",
+                    "surface-variant": "#e0e3e5",
+                    "surface-dim": "#d8dadc",
+                    "inverse-on-surface": "#eff1f3",
+                    "on-background": "#191c1e",
+                    "tertiary": "#07182b",
+                    "surface-bright": "#f7f9fb",
+                    "on-primary": "#ffffff",
+                    "primary-fixed": "#d8e2ff",
+                    "secondary-fixed-dim": "#3cddc7",
+                    "on-tertiary": "#ffffff",
+                    "surface-container": "#eceef0",
+                    "inverse-surface": "#2d3133"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "stack-md": "16px",
+                    "container-margin": "20px",
+                    "base": "8px",
+                    "stack-lg": "24px",
+                    "stack-sm": "4px",
+                    "gutter": "12px"
+            },
+            "fontFamily": {
+                    "headline-lg-mobile": ["Inter"],
+                    "headline-lg": ["Inter"],
+                    "label-caps": ["Inter"],
+                    "headline-sm": ["Inter"],
+                    "body-md": ["Inter"],
+                    "data-display": ["Inter"],
+                    "body-lg": ["Inter"],
+                    "headline-md": ["Inter"]
+            },
+            "fontSize": {
+                    "headline-lg-mobile": ["26px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                    "headline-sm": ["16px", {"lineHeight": "24px", "fontWeight": "600"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "data-display": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                    "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface dark:bg-gray-950 min-h-screen pb-32">
+<a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[100] focus:bg-primary-container focus:text-white focus:px-4 focus:py-2 focus:rounded-full focus:outline-none">Skip to main content</a>
+<!-- TopAppBar -->
+<header class="w-full sticky top-0 z-40 bg-surface dark:bg-surface-dim shadow-sm border-b border-outline-variant dark:border-outline" role="banner">
+<div class="flex items-center justify-between px-container-margin py-base w-full max-w-full">
+<div class="flex items-center gap-stack-md">
+<button class="material-symbols-outlined text-primary dark:text-gray-100 hover:bg-surface-container-high transition-colors p-2 rounded-full active:scale-95 duration-150" data-icon="arrow_back">arrow_back</button>
+<div class="flex items-center gap-3">
+    <svg class="w-8 h-8 flex-shrink-0" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="TenantMatch">
+      <rect width="32" height="32" rx="8" fill="#62fae3"/>
+      <path d="M16 5L4 16h3v11h8V18h2v9h8V16h3L16 5z" fill="#031636"/>
+    </svg>
+    <h1 class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed">TenantMatch</h1>
+  </div>
+</div>
+<div class="flex items-center gap-base">
+<button onclick="toggleDarkMode()" class="p-2 hover:bg-surface-container-low dark:hover:bg-gray-700 transition-colors rounded-full text-primary dark:text-primary-fixed active:scale-95 duration-150" aria-label="Toggle dark mode">
+  <span class="material-symbols-outlined" id="darkModeIcon">dark_mode</span>
+</button>
+<span class="material-symbols-outlined text-on-surface-variant dark:text-gray-400" data-icon="notifications" aria-hidden="true">notifications</span>
+<a href="05-user-profile.html" class="w-8 h-8 rounded-full overflow-hidden border border-outline-variant dark:border-gray-700 flex-shrink-0">
+<img alt="User Profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida/ADBb0ugPQN-KS7toteZ5y8vPe7S70ye0JN7pk3goY7ebht46oprOZQOEVqAXFfx5IOIM9x38WbeTrk_6nMxGy-0mwR37ts6WgOJVXMMcSoujerYea61dDlHzP-GAlzp9_cVZbQYUPkf-tWHt96a_p4kGbbFuT4krOsvLxoATaaGH5IK1kcyM1tD4LC7LppzwMPUiv_0E94-r2ucqc1ggrrFPTTRQ4pG11XG9T6t2GYExUTcVuLTGy6a5E5G6fR8">
+</a>
+</div>
+</div>
+</header>
+<main id="main-content" class="px-container-margin py-stack-lg max-w-2xl mx-auto">
+<!-- Progress Bar -->
+<div class="mb-stack-lg">
+<div class="flex justify-between items-end mb-base">
+<span class="font-label-caps text-label-caps text-secondary">STEP 4 OF 4</span>
+<span class="font-headline-sm text-headline-sm text-primary dark:text-gray-100">Review &amp; Submit</span>
+</div>
+<div class="h-2 w-full bg-surface-container-highest dark:bg-gray-700 rounded-full overflow-hidden">
+<div class="h-full w-full bg-secondary rounded-full transition-all duration-700 ease-out"></div>
+</div>
+</div>
+<!-- Application Summary -->
+<div class="space-y-stack-lg">
+<!-- Personal Info Section -->
+<section class="glass-card dark:bg-gray-900 dark:border-gray-700 rounded-xl p-stack-md">
+<div class="flex justify-between items-center mb-stack-md">
+<h2 class="font-headline-sm text-headline-sm text-primary dark:text-gray-100 flex items-center gap-base">
+<span class="material-symbols-outlined text-secondary" data-icon="person" aria-hidden="true">person</span>
+                        Personal Information
+                    </h2>
+<button class="text-secondary font-label-caps text-label-caps hover:underline">EDIT</button>
+</div>
+<div class="grid grid-cols-2 gap-stack-md">
+<div>
+<p class="font-label-caps text-label-caps text-on-surface-variant dark:text-gray-400">FULL NAME</p>
+<p class="font-body-lg text-body-lg text-on-surface">Alexander J. Sterling</p>
+</div>
+<div>
+<p class="font-label-caps text-label-caps text-on-surface-variant dark:text-gray-400">EMAIL ADDRESS</p>
+<p class="font-body-lg text-body-lg text-on-surface">a.sterling@example.com</p>
+</div>
+<div>
+<p class="font-label-caps text-label-caps text-on-surface-variant dark:text-gray-400">PHONE</p>
+<p class="font-body-lg text-body-lg text-on-surface">+1 (555) 234-8901</p>
+</div>
+<div>
+<p class="font-label-caps text-label-caps text-on-surface-variant dark:text-gray-400">ANNUAL INCOME</p>
+<p class="font-body-lg text-body-lg text-on-surface">$125,000</p>
+</div>
+</div>
+</section>
+<!-- Documents Section -->
+<section class="glass-card dark:bg-gray-900 dark:border-gray-700 rounded-xl p-stack-md">
+<div class="flex justify-between items-center mb-stack-md">
+<h2 class="font-headline-sm text-headline-sm text-primary dark:text-gray-100 flex items-center gap-base">
+<span class="material-symbols-outlined text-secondary" data-icon="description" aria-hidden="true">description</span>
+                        Documents
+                    </h2>
+<button class="text-secondary font-label-caps text-label-caps hover:underline">EDIT</button>
+</div>
+<div class="space-y-stack-sm">
+<div class="flex items-center justify-between p-base bg-surface-container-low rounded-lg border border-outline-variant dark:border-gray-700">
+<div class="flex items-center gap-base">
+<span class="material-symbols-outlined text-primary dark:text-gray-100" data-icon="picture_as_pdf" aria-hidden="true">picture_as_pdf</span>
+<span class="font-body-md text-body-md">Government_ID_Sterling.pdf</span>
+</div>
+<span class="material-symbols-outlined text-on-secondary-container" data-icon="check_circle" data-weight="fill" style="font-variation-settings: 'FILL' 1;" aria-hidden="true">check_circle</span>
+</div>
+<div class="flex items-center justify-between p-base bg-surface-container-low rounded-lg border border-outline-variant dark:border-gray-700">
+<div class="flex items-center gap-base">
+<span class="material-symbols-outlined text-primary dark:text-gray-100" data-icon="picture_as_pdf" aria-hidden="true">picture_as_pdf</span>
+<span class="font-body-md text-body-md">Pay_Stubs_Q3_2023.pdf</span>
+</div>
+<span class="material-symbols-outlined text-on-secondary-container" data-icon="check_circle" data-weight="fill" style="font-variation-settings: 'FILL' 1;" aria-hidden="true">check_circle</span>
+</div>
+</div>
+</section>
+<!-- References Section -->
+<section class="glass-card dark:bg-gray-900 dark:border-gray-700 rounded-xl p-stack-md">
+<div class="flex justify-between items-center mb-stack-md">
+<h2 class="font-headline-sm text-headline-sm text-primary dark:text-gray-100 flex items-center gap-base">
+<span class="material-symbols-outlined text-secondary" data-icon="groups" aria-hidden="true">groups</span>
+                        References
+                    </h2>
+<button class="text-secondary font-label-caps text-label-caps hover:underline">EDIT</button>
+</div>
+<div class="space-y-stack-md">
+<div class="flex flex-col">
+<p class="font-body-md text-body-md font-semibold">Sarah Jenkins</p>
+<p class="font-body-md text-body-md text-on-surface-variant dark:text-gray-400 italic">Previous Landlord (2019-2023)</p>
+<p class="font-body-md text-body-md text-on-surface-variant dark:text-gray-400">+1 (555) 012-3456</p>
+</div>
+<div class="h-px bg-outline-variant w-full"></div>
+<div class="flex flex-col">
+<p class="font-body-md text-body-md font-semibold">Robert Chen</p>
+<p class="font-body-md text-body-md text-on-surface-variant dark:text-gray-400 italic">Professional Supervisor</p>
+<p class="font-body-md text-body-md text-on-surface-variant dark:text-gray-400">+1 (555) 987-6543</p>
+</div>
+</div>
+</section>
+<!-- Final Confirmation -->
+<div class="mt-stack-lg space-y-stack-md">
+<div class="flex items-start gap-stack-md p-stack-md bg-secondary-container/10 dark:bg-gray-900 rounded-xl border border-secondary/20">
+<div class="pt-1">
+<input class="w-5 h-5 rounded border-outline text-secondary focus:ring-secondary cursor-pointer" id="terms" type="checkbox"/>
+</div>
+<label class="font-body-md text-body-md text-on-surface cursor-pointer" for="terms">
+                        I hereby certify that the information provided is accurate and complete. I authorize TenantMatch to conduct a background check and contact my references as part of the screening process. I agree to the <a class="text-secondary underline" href="#" onclick="event.preventDefault();showAlert('Terms &amp; Conditions','By using TenantMatch, you agree to our standard rental application terms. All information provided must be accurate and complete. TenantMatch will conduct a background check and verify references as part of the screening process. Estimated processing time is 24-48 hours.');">Terms &amp; Conditions</a>.
+                    </label>
+</div>
+<div class="flex flex-col sm:flex-row gap-stack-md pt-base">
+<a href="11-application-portal-step3.html" class="flex-1 px-stack-lg py-4 border-2 border-primary text-primary dark:text-gray-100 font-headline-sm rounded-lg hover:bg-surface-container-high transition-colors active:scale-95 duration-150 block text-center no-underline">Back to References</a>
+<button class="flex-[2] px-stack-lg py-4 bg-primary text-on-primary font-headline-sm rounded-lg shadow-lg hover:shadow-xl transition-all active:scale-95 duration-150 disabled:opacity-50 disabled:cursor-not-allowed" id="submitBtn">
+                        Submit Application
+                    </button>
+</div>
+<p class="text-center font-label-caps text-label-caps text-on-surface-variant dark:text-gray-400">
+                    Estimated processing time: 24-48 hours
+                </p>
+</div>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-center bg-surface dark:bg-gray-950 px-gutter pb-stack-md pt-base z-50 rounded-t-xl border-t border-outline-variant dark:border-gray-700 shadow-lg">
+<a href="15-home-page.html" class="flex flex-col items-center justify-center text-on-surface-variant dark:text-gray-400 px-4 py-1 hover:bg-surface-container-low active:scale-90 transition-transform duration-200 rounded-xl">
+<span class="material-symbols-outlined" aria-hidden="true">home</span>
+<span class="font-label-caps text-label-caps mt-1">Home</span>
+</a>
+<a href="16-map-search.html" class="flex flex-col items-center justify-center text-on-surface-variant dark:text-gray-400 px-4 py-1 hover:bg-surface-container-low active:scale-90 transition-transform duration-200 rounded-xl">
+<span class="material-symbols-outlined" aria-hidden="true">search</span>
+<span class="font-label-caps text-label-caps mt-1">Search</span>
+</a>
+<a href="14-saved-searches.html" class="flex flex-col items-center justify-center text-on-surface-variant dark:text-gray-400 px-4 py-1 hover:bg-surface-container-low active:scale-90 transition-transform duration-200 rounded-xl">
+<span class="material-symbols-outlined" aria-hidden="true">favorite</span>
+<span class="font-label-caps text-label-caps mt-1">Saved</span>
+</a>
+<a href="05-user-profile.html" class="flex flex-col items-center justify-center text-on-surface-variant dark:text-gray-400 px-4 py-1 hover:bg-surface-container-low active:scale-90 transition-transform duration-200 rounded-xl">
+<span class="material-symbols-outlined" aria-hidden="true">person</span>
+<span class="font-label-caps text-label-caps mt-1">Profile</span>
+</a>
+</nav>
+<script>
+        const checkbox = document.getElementById('terms');
+        const submitBtn = document.getElementById('submitBtn');
+        submitBtn.disabled = !checkbox.checked;
+        checkbox.addEventListener('change', (e) => {
+            submitBtn.disabled = !e.target.checked;
+        });
+    </script>
+  <script src="app.js"></script>
+</body></html>
