@@ -54,15 +54,43 @@ class _ListingDetailsScreenState extends State<ListingDetailsScreen> {
                           color: AppTheme.surfaceContainerOf(context),
                           child: Image.network(p.imageUrl,
                               fit: BoxFit.cover,
+                              cacheWidth: 600,
+                              cacheHeight: 375,
                               errorBuilder: (_, __, ___) => Icon(Icons.home,
                                   size: 64, color: cs.onSurfaceVariant)),
+                        ),
+                        // Gradient overlay with address
+                        Positioned(
+                          left: 0, right: 0, bottom: 0,
+                          child: Container(
+                            height: 64,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                colors: [Colors.transparent, Colors.black.withOpacity(0.65)],
+                              ),
+                            ),
+                            padding: const EdgeInsets.only(left: 12, right: 12, bottom: 10),
+                            alignment: Alignment.bottomLeft,
+                            child: Text(
+                              p.title,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.w700,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
                         ),
                         if (p.isHot || p.isGreatValue)
                           Positioned(
                             top: 12,
                             left: 12,
                             child: Container(
-                              padding: EdgeInsets.symmetric(
+                              padding: const EdgeInsets.symmetric(
                                   horizontal: 8, vertical: 4),
                               decoration: BoxDecoration(
                                 color: cs.surface,
@@ -76,7 +104,7 @@ class _ListingDetailsScreenState extends State<ListingDetailsScreen> {
                                       size: 14,
                                       color: p.chipColor,
                                     ),
-                                    SizedBox(width: 4),
+                                    const SizedBox(width: 4),
                                     Text(p.chipLabel, style: AppTextStyle.labelCaps.copyWith(color: p.chipColor)),
                                   ]),
                             ),
@@ -85,9 +113,9 @@ class _ListingDetailsScreenState extends State<ListingDetailsScreen> {
                           label: 'Tenant score ${p.tenantScore} out of 100',
                           child: Positioned(
                             bottom: 12,
-                            left: 12,
+                            right: 12,
                             child: Container(
-                              padding: EdgeInsets.symmetric(
+                              padding: const EdgeInsets.symmetric(
                                   horizontal: 10, vertical: 6),
                               decoration: BoxDecoration(
                                 color: cs.secondaryContainer,
