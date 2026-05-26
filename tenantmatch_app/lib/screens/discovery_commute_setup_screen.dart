@@ -42,7 +42,7 @@ class _DiscoveryCommuteSetupScreenState extends State<DiscoveryCommuteSetupScree
                   begin: Alignment.topLeft, end: Alignment.bottomRight,
                 ),
               ),
-              child: Center(child: Icon(Icons.home_pin, size: 64, color: Colors.white.withOpacity(0.3))),
+              child: Center(child: Icon(Icons.pin_drop, size: 64, color: Colors.white.withOpacity(0.3))),
             ),
             Padding(
               padding: EdgeInsets.all(AppTheme.containerMargin),

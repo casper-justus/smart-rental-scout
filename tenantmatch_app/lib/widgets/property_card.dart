@@ -183,7 +183,7 @@ class PropertyCard extends StatelessWidget {
                       if (property.petsOk) ...[
                         SizedBox(width: 8),
                         _buildPerkChip(null, 'PETS OK',
-                            icon: Icons.pets, context: context),
+                            context, icon: Icons.pets),
                       ],
                     ],
                   ),
