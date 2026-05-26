@@ -3,23 +3,54 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class ThemeService {
   static final ValueNotifier<ThemeMode> modeNotifier =
-      ValueNotifier(ThemeMode.light);
+      ValueNotifier(ThemeMode.system);
 
   static Future<void> init() async {
     final prefs = await SharedPreferences.getInstance();
-    final isDark = prefs.getBool('tm-dark-mode') ?? false;
-    modeNotifier.value = isDark ? ThemeMode.dark : ThemeMode.light;
+    final stored = prefs.getString('tm-theme-mode') ?? 'system';
+    modeNotifier.value = _fromString(stored);
   }
 
-  static void toggle() {
-    final newMode = modeNotifier.value == ThemeMode.dark
-        ? ThemeMode.light
-        : ThemeMode.dark;
-    modeNotifier.value = newMode;
+  static void cycleMode() {
+    final order = [ThemeMode.system, ThemeMode.light, ThemeMode.dark];
+    final idx = order.indexOf(modeNotifier.value);
+    final next = order[(idx + 1) % order.length];
+    modeNotifier.value = next;
     SharedPreferences.getInstance().then((prefs) {
-      prefs.setBool('tm-dark-mode', newMode == ThemeMode.dark);
+      prefs.setString('tm-theme-mode', _toString(next));
     });
   }
 
-  static bool get isDark => modeNotifier.value == ThemeMode.dark;
+  static String get label {
+    switch (modeNotifier.value) {
+      case ThemeMode.system:
+        return 'Auto';
+      case ThemeMode.light:
+        return 'Light';
+      case ThemeMode.dark:
+        return 'Dark';
+    }
+  }
+
+  static ThemeMode _fromString(String s) {
+    switch (s) {
+      case 'light':
+        return ThemeMode.light;
+      case 'dark':
+        return ThemeMode.dark;
+      default:
+        return ThemeMode.system;
+    }
+  }
+
+  static String _toString(ThemeMode m) {
+    switch (m) {
+      case ThemeMode.light:
+        return 'light';
+      case ThemeMode.dark:
+        return 'dark';
+      default:
+        return 'system';
+    }
+  }
 }

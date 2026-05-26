@@ -42,7 +42,6 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final isDark = ThemeService.isDark;
     return Scaffold(
       backgroundColor: cs.surface,
       body: SafeArea(
@@ -97,7 +96,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                   SizedBox(height: AppTheme.spacingLg),
                   _toggle('Email Notifications', _emailNotif, (v) { setState(() { _emailNotif = v; }); }, context),
                   _toggle('SMS Alerts', _smsAlerts, (v) { setState(() { _smsAlerts = v; }); }, context),
-                  _toggle('Dark Mode', isDark, (v) { ThemeService.toggle(); }, context),
+                  _themeRow(context),
                   SizedBox(height: AppTheme.spacingLg),
                   GestureDetector(
                     onTap: () { ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Profile saved!'), behavior: SnackBarBehavior.floating)); },
@@ -143,6 +142,46 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
       child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
         Text(label, style: AppTextStyle.bodyMd),
         Switch(value: value, onChanged: onChanged, activeColor: cs.primary),
+      ]),
+    );
+  }
+
+  Widget _themeRow(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 4),
+      child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+        Text('Theme', style: AppTextStyle.bodyMd),
+        GestureDetector(
+          onTap: () {
+            ThemeService.cycleMode();
+            setState(() {});
+          },
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: cs.surfaceContainerLow,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: cs.outlineVariant),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  ThemeService.modeNotifier.value == ThemeMode.system
+                      ? Icons.brightness_auto
+                      : ThemeService.modeNotifier.value == ThemeMode.dark
+                          ? Icons.dark_mode
+                          : Icons.light_mode,
+                  size: 18,
+                  color: cs.primary,
+                ),
+                SizedBox(width: 8),
+                Text(ThemeService.label, style: AppTextStyle.bodyMd.copyWith(fontWeight: FontWeight.w600)),
+              ],
+            ),
+          ),
+        ),
       ]),
     );
   }

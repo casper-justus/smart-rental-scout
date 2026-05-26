@@ -59,7 +59,7 @@ class _MapSearchScreenState extends State<MapSearchScreen> {
                       ),
                     ),
                     GestureDetector(
-                      onTap: () => showAppAlert(context, 'Filters', 'Price Range: \$500 - \$5,000 · Bedrooms: 1-4 · Property Type: Apartment, House, Condo · Amenities: Parking, Gym, Laundry, Pets'),
+                      onTap: () => showAppAlert(context, 'Filters', 'Price Range: \$500 – \$5,000 · Bedrooms: 1–4 · Property Type: Apartment, House, Condo · Amenities: Parking, Gym, Laundry, Pets'),
                       child: Container(
                         width: 32, height: 32,
                         decoration: BoxDecoration(
@@ -167,7 +167,7 @@ class _MapSearchScreenState extends State<MapSearchScreen> {
                     top: 240,
                     child: Column(
                       children: [
-                        _mapBtn(Icons.my_location, () => showAppAlert(context, 'Finding Location', 'Using GPS to determine your current location...'), context),
+                        _mapBtn(Icons.my_location, () => showAppAlert(context, 'Finding Location', 'Using GPS to determine your current location…'), context),
                         SizedBox(height: 8),
                         Container(
                           decoration: BoxDecoration(
@@ -216,7 +216,14 @@ class _MapSearchScreenState extends State<MapSearchScreen> {
                 ],
               ),
             ),
-            AppBottomNav(currentIndex: 1, onTap: (_) {}),
+            AppBottomNav(
+              currentIndex: 1,
+              onTap: (i) {
+                if (i == 0) Navigator.pushNamed(context, '/home');
+                if (i == 2) Navigator.pushNamed(context, '/saved');
+                if (i == 3) Navigator.pushNamed(context, '/profile');
+              },
+            ),
           ],
         ),
       ),
