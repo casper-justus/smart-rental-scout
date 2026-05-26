@@ -307,6 +307,7 @@ class _MapSearchScreenState extends State<MapSearchScreen> {
   }
 
   Widget _buildMapView(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     if (_filteredProps.isEmpty) {
       return _EmptyState(onClear: () {
         _filters = const FilterOptions();
@@ -434,61 +435,6 @@ class _MapSearchScreenState extends State<MapSearchScreen> {
                 await favoritesService.toggle(p.id);
                 setState(() {});
               },
-            ),
-          ),
-        ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Handle bar
-                Center(
-                  child: Container(
-                    margin: const EdgeInsets.only(top: 8, bottom: 4),
-                    width: 32, height: 4,
-                    decoration: BoxDecoration(
-                      color: cs.onSurfaceVariant.withOpacity(0.3),
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(left: AppTheme.containerMargin, bottom: 4),
-                  child: Text(
-                    _selectedProperty != null ? 'Selected property' : 'Tap a pin or scroll listings',
-                    style: AppTextStyle.labelCaps.copyWith(color: cs.onSurfaceVariant),
-                  ),
-                ),
-                SizedBox(
-                  height: 120,
-                  child: ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.symmetric(horizontal: AppTheme.containerMargin),
-                    itemCount: _filteredProps.length,
-                    separatorBuilder: (_, __) => const SizedBox(width: AppTheme.gutter),
-                    itemBuilder: (_, i) {
-                      final p = _filteredProps[i];
-                      final isSel = _selectedProperty?.id == p.id;
-                      return SizedBox(
-                        width: 220,
-                        child: PropertyCard(
-                          property: p,
-                          isFavorite: favoritesService.isFavorite(p.id),
-                          compact: true,
-                          onTap: () {
-                            _selectProperty(p);
-                          },
-                          onFavoriteTap: () async {
-                            await favoritesService.toggle(p.id);
-                            setState(() {});
-                          },
-                        ),
-                      );
-                    },
-                  ),
-                ),
-                const SizedBox(height: 4),
-              ],
             ),
           ),
         ),
