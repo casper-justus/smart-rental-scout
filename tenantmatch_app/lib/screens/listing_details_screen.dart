@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../theme/app_theme.dart';
 
 import '../widgets/app_top_bar.dart';
@@ -52,11 +53,15 @@ class _ListingDetailsScreenState extends State<ListingDetailsScreen> {
                           height: 250,
                           width: double.infinity,
                           color: AppTheme.surfaceContainerOf(context),
-                          child: Image.network(p.imageUrl,
+                          child: CachedNetworkImage(
+                              imageUrl: p.imageUrl,
                               fit: BoxFit.cover,
-                              cacheWidth: 600,
-                              cacheHeight: 375,
-                              errorBuilder: (_, __, ___) => Icon(Icons.home,
+                              memCacheWidth: 600,
+                              memCacheHeight: 375,
+                              placeholder: (_, __) => Container(
+                                color: AppTheme.surfaceContainerOf(context),
+                              ),
+                              errorWidget: (_, __, ___) => Icon(Icons.home,
                                   size: 64, color: cs.onSurfaceVariant)),
                         ),
                         // Gradient overlay with address

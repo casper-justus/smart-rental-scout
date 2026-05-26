@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../theme/app_theme.dart';
 import '../widgets/app_dialog.dart';
 import '../widgets/app_top_bar.dart';
@@ -78,8 +79,10 @@ class _ComparePropertiesScreenState extends State<ComparePropertiesScreen> {
                         Padding(
                           padding: EdgeInsets.symmetric(horizontal: AppTheme.spacingMd),
                           child: Column(children: [
-                            Container(height: 120, color: AppTheme.surfaceContainerOf(context), child: Image.network(p.imageUrl, fit: BoxFit.cover, width: double.infinity,
-                              errorBuilder: (_, __, ___) => Icon(Icons.home, color: cs.onSurfaceVariant))),
+                            Container(height: 120, color: AppTheme.surfaceContainerOf(context), child: CachedNetworkImage(imageUrl: p.imageUrl, fit: BoxFit.cover, width: double.infinity,
+                              memCacheWidth: 300, memCacheHeight: 180,
+                              placeholder: (_, __) => Container(color: AppTheme.surfaceContainerOf(context)),
+                              errorWidget: (_, __, ___) => Icon(Icons.home, color: cs.onSurfaceVariant))),
                             SizedBox(height: 12),
                             Text(p.price, style: AppTextStyle.headlineMd.copyWith(color: cs.primary)),
                             Text(p.address, style: AppTextStyle.bodyMd.copyWith(color: cs.onSurfaceVariant), maxLines: 2),

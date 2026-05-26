@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../theme/app_theme.dart';
 import '../widgets/property_card.dart';
 import '../widgets/bottom_nav.dart';
@@ -306,26 +307,20 @@ class _MapSearchScreenState extends State<MapSearchScreen> {
   }
 
   Widget _buildMapView(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
     if (_filteredProps.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.search_off, size: 64, color: cs.onSurfaceVariant.withOpacity(0.3)),
-            const SizedBox(height: 8),
-            Text('No properties match your filters',
-                style: AppTextStyle.bodyMd.copyWith(color: cs.onSurfaceVariant)),
-          ],
-        ),
-      );
+      return _EmptyState(onClear: () {
+        _filters = const FilterOptions();
+        _searchCtrl.clear();
+        _applyFiltersAndSearch();
+      });
     }
 
     return Stack(
       children: [
-        // Map
+        // Map (wrapped in RepaintBoundary to isolate expensive tile repaints)
         Positioned.fill(
-          child: FlutterMap(
+          child: RepaintBoundary(
+            child: FlutterMap(
             mapController: _mapCtrl,
           options: MapOptions(
             initialCenter: _defaultCenter,
@@ -364,16 +359,13 @@ class _MapSearchScreenState extends State<MapSearchScreen> {
                         children: [
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: isSelected ? cs.secondary : cs.primary,
-                              borderRadius: BorderRadius.circular(8),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(isSelected ? 0.35 : 0.2),
-                                  blurRadius: isSelected ? 8 : 4,
-                                ),
-                              ],
-                            ),
+                              decoration: BoxDecoration(
+                                color: isSelected ? cs.secondary : cs.primary,
+                                borderRadius: BorderRadius.circular(8),
+                                boxShadow: isSelected
+                                    ? _selectedShadow
+                                    : _defaultShadow,
+                              ),
                             child: Text(
                               p.title,
                               style: TextStyle(
@@ -398,6 +390,7 @@ class _MapSearchScreenState extends State<MapSearchScreen> {
             ),
           ],
           ),
+            ),
         ),
         // Summary card when a property is selected (like Google Maps info window)
         if (_selectedProperty != null)
@@ -415,52 +408,35 @@ class _MapSearchScreenState extends State<MapSearchScreen> {
         Positioned(
           right: AppTheme.containerMargin,
           bottom: 180,
-          child: Container(
-            decoration: BoxDecoration(
-              color: cs.surface,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: cs.outlineVariant.withOpacity(0.3)),
-              boxShadow: [
-                BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 8),
-              ],
-            ),
-            child: Column(
-              children: [
-                _mapBtn(Icons.add, () {
-                  _mapCtrl.move(
-                    _mapCtrl.camera.center,
-                    (_mapCtrl.camera.zoom + 1).clamp(_minZoom, _maxZoom),
-                  );
-                }, context, border: false),
-                Divider(height: 1, color: cs.outlineVariant.withOpacity(0.3)),
-                _mapBtn(Icons.remove, () {
-                  _mapCtrl.move(
-                    _mapCtrl.camera.center,
-                    (_mapCtrl.camera.zoom - 1).clamp(_minZoom, _maxZoom),
-                  );
-                }, context, border: false),
-                Divider(height: 1, color: cs.outlineVariant.withOpacity(0.3)),
-                _mapBtn(Icons.my_location, _goToMyLocation, context, border: false),
-              ],
+          child: RepaintBoundary(
+            child: _ZoomControls(
+              onZoomIn: () => _mapCtrl.move(
+                _mapCtrl.camera.center,
+                (_mapCtrl.camera.zoom + 1).clamp(_minZoom, _maxZoom),
+              ),
+              onZoomOut: () => _mapCtrl.move(
+                _mapCtrl.camera.center,
+                (_mapCtrl.camera.zoom - 1).clamp(_minZoom, _maxZoom),
+              ),
+              onMyLocation: _goToMyLocation,
             ),
           ),
         ),
         // Bottom sheet with property list overlay
         Positioned(
           left: 0, right: 0, bottom: 0,
-          child: Container(
-            constraints: const BoxConstraints(maxHeight: 160),
-            decoration: BoxDecoration(
-              color: cs.surface.withOpacity(0.95),
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.08),
-                  blurRadius: 12,
-                  offset: const Offset(0, -2),
-                ),
-              ],
+          child: RepaintBoundary(
+            child: _PropertyListSheet(
+              selectedProperty: _selectedProperty,
+              filteredProps: _filteredProps,
+              onSelect: _selectProperty,
+              onFavoriteTap: (p) async {
+                await favoritesService.toggle(p.id);
+                setState(() {});
+              },
             ),
+          ),
+        ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -521,36 +497,12 @@ class _MapSearchScreenState extends State<MapSearchScreen> {
   }
 
   Widget _buildListView(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
     if (_filteredProps.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.search_off, size: 64, color: cs.onSurfaceVariant.withOpacity(0.3)),
-            const SizedBox(height: 8),
-            Text('No properties match your filters',
-                style: AppTextStyle.bodyMd.copyWith(color: cs.onSurfaceVariant)),
-            const SizedBox(height: 16),
-            GestureDetector(
-              onTap: () {
-                _filters = const FilterOptions();
-                _searchCtrl.clear();
-                _applyFiltersAndSearch();
-              },
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                decoration: BoxDecoration(
-                  color: cs.primary,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text('Clear Filters',
-                    style: AppTextStyle.bodyMd.copyWith(color: cs.onPrimary, fontWeight: FontWeight.w600)),
-              ),
-            ),
-          ],
-        ),
-      );
+      return _EmptyState(onClear: () {
+        _filters = const FilterOptions();
+        _searchCtrl.clear();
+        _applyFiltersAndSearch();
+      });
     }
 
     return ListView.builder(
@@ -576,7 +528,53 @@ class _MapSearchScreenState extends State<MapSearchScreen> {
     );
   }
 
-  Widget _mapBtn(IconData icon, VoidCallback onTap, BuildContext context, {bool border = true}) {
+}
+
+/// Extracted zoom controls with RepaintBoundary isolation.
+class _ZoomControls extends StatelessWidget {
+  final VoidCallback onZoomIn;
+  final VoidCallback onZoomOut;
+  final VoidCallback onMyLocation;
+
+  const _ZoomControls({
+    required this.onZoomIn,
+    required this.onZoomOut,
+    required this.onMyLocation,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Container(
+      decoration: BoxDecoration(
+        color: cs.surface,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: cs.outlineVariant),
+        boxShadow: const [
+          BoxShadow(color: _shadowLight, blurRadius: 8),
+        ],
+      ),
+      child: Column(
+        children: [
+          _ZoomBtn(icon: Icons.add, onTap: onZoomIn),
+          Divider(height: 1, color: cs.outlineVariant),
+          _ZoomBtn(icon: Icons.remove, onTap: onZoomOut),
+          Divider(height: 1, color: cs.outlineVariant),
+          _ZoomBtn(icon: Icons.my_location, onTap: onMyLocation),
+        ],
+      ),
+    );
+  }
+}
+
+/// Individual zoom button extracted to avoid rebuilds.
+class _ZoomBtn extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback onTap;
+  const _ZoomBtn({required this.icon, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: onTap,
@@ -588,6 +586,135 @@ class _MapSearchScreenState extends State<MapSearchScreen> {
     );
   }
 }
+
+/// Extracted bottom property list sheet for rebuild isolation.
+class _PropertyListSheet extends StatelessWidget {
+  final PropertyListing? selectedProperty;
+  final List<PropertyListing> filteredProps;
+  final ValueChanged<PropertyListing> onSelect;
+  final ValueChanged<PropertyListing> onFavoriteTap;
+
+  const _PropertyListSheet({
+    required this.selectedProperty,
+    required this.filteredProps,
+    required this.onSelect,
+    required this.onFavoriteTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Container(
+      constraints: const BoxConstraints(maxHeight: 160),
+      decoration: BoxDecoration(
+        color: cs.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+        boxShadow: const [
+          BoxShadow(
+            color: _shadowSheet,
+            blurRadius: 12,
+            offset: Offset(0, -2),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Handle bar
+          Center(
+            child: Container(
+              margin: const EdgeInsets.only(top: 8, bottom: 4),
+              width: 32, height: 4,
+              decoration: BoxDecoration(
+                color: cs.onSurfaceVariant,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: AppTheme.containerMargin, bottom: 4),
+            child: Text(
+              selectedProperty != null ? 'Selected property' : 'Tap a pin or scroll listings',
+              style: AppTextStyle.labelCaps.copyWith(color: cs.onSurfaceVariant),
+            ),
+          ),
+          SizedBox(
+            height: 120,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: AppTheme.containerMargin),
+              itemCount: filteredProps.length,
+              separatorBuilder: (_, __) => const SizedBox(width: AppTheme.gutter),
+              itemBuilder: (_, i) {
+                final p = filteredProps[i];
+                final isSel = selectedProperty?.id == p.id;
+                return SizedBox(
+                  width: 220,
+                  child: PropertyCard(
+                    property: p,
+                    isFavorite: favoritesService.isFavorite(p.id),
+                    compact: true,
+                    onTap: () => onSelect(p),
+                    onFavoriteTap: () => onFavoriteTap(p),
+                  ),
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 4),
+        ],
+      ),
+    );
+  }
+}
+
+/// Reusable empty state with optional "Clear Filters" action.
+class _EmptyState extends StatelessWidget {
+  final VoidCallback? onClear;
+  const _EmptyState({this.onClear});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.search_off, size: 64, color: cs.onSurfaceVariant),
+          const SizedBox(height: 8),
+          Text('No properties match your filters',
+              style: AppTextStyle.bodyMd.copyWith(color: cs.onSurfaceVariant)),
+          if (onClear != null) ...[
+            const SizedBox(height: 16),
+            GestureDetector(
+              onTap: onClear,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                decoration: BoxDecoration(
+                  color: cs.primary,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text('Clear Filters',
+                    style: AppTextStyle.bodyMd.copyWith(color: cs.onPrimary, fontWeight: FontWeight.w600)),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+/// Top-level shadow colors to avoid `withOpacity` allocations on every build.
+const Color _shadowLight = Color(0x1A000000); // Colors.black.withOpacity(0.1)
+const Color _shadowSheet = Color(0x14000000); // Colors.black.withOpacity(0.08)
+const List<BoxShadow> _selectedShadow = [
+  BoxShadow(color: Color(0x59000000), blurRadius: 8), // Colors.black.withOpacity(0.35)
+];
+const List<BoxShadow> _defaultShadow = [
+  BoxShadow(color: Color(0x33000000), blurRadius: 4), // Colors.black.withOpacity(0.2)
+];
 
 /// Google Maps-style summary card shown above the bottom sheet when a pin is tapped.
 class _PropertySummaryCard extends StatelessWidget {
@@ -607,7 +734,7 @@ class _PropertySummaryCard extends StatelessWidget {
     return Material(
       elevation: 8,
       borderRadius: BorderRadius.circular(14),
-      shadowColor: Colors.black.withOpacity(0.2),
+      shadowColor: const Color(0x33000000), // Colors.black.withOpacity(0.2)
       child: Container(
         decoration: BoxDecoration(
           color: cs.surface,
@@ -628,12 +755,15 @@ class _PropertySummaryCard extends StatelessWidget {
                     child: SizedBox(
                       width: 64,
                       height: 64,
-                      child: Image.network(
-                        property.imageUrl,
+                      child: CachedNetworkImage(
+                        imageUrl: property.imageUrl,
                         fit: BoxFit.cover,
-                        cacheWidth: 128,
-                        cacheHeight: 128,
-                        errorBuilder: (_, __, ___) => Container(
+                        memCacheWidth: 128,
+                        memCacheHeight: 128,
+                        placeholder: (_, __) => Container(
+                          color: AppTheme.surfaceContainerOf(context),
+                        ),
+                        errorWidget: (_, __, ___) => Container(
                           color: AppTheme.surfaceContainerOf(context),
                           child: Icon(Icons.home, color: cs.onSurfaceVariant, size: 28),
                         ),
@@ -702,7 +832,7 @@ class _PropertySummaryCard extends StatelessWidget {
                 child: Container(
                   width: 28, height: 3,
                   decoration: BoxDecoration(
-                    color: cs.onSurfaceVariant.withOpacity(0.3),
+                    color: cs.onSurfaceVariant,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),

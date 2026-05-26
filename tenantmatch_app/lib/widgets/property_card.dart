@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../theme/app_theme.dart';
 import '../models/property.dart';
 import '../main.dart';
@@ -69,7 +70,8 @@ class PropertyCard extends StatelessWidget {
     final decodeWidth = compact ? 300 : 400;
     final decodeHeight = compact ? 180 : 240;
 
-    return Hero(
+    return RepaintBoundary(
+      child: Hero(
       tag: 'property_img_${property.id}',
       child: Stack(
         children: [
@@ -80,12 +82,15 @@ class PropertyCard extends StatelessWidget {
               height: imgHeight.toDouble(),
               width: double.infinity,
               color: AppTheme.surfaceContainerOf(context),
-              child: Image.network(
-                property.imageUrl,
+              child: CachedNetworkImage(
+                imageUrl: property.imageUrl,
                 fit: BoxFit.cover,
-                cacheWidth: decodeWidth,
-                cacheHeight: decodeHeight,
-                errorBuilder: (_, __, ___) => Icon(
+                memCacheWidth: decodeWidth,
+                memCacheHeight: decodeHeight,
+                placeholder: (_, __) => Container(
+                  color: AppTheme.surfaceContainerOf(context),
+                ),
+                errorWidget: (_, __, ___) => Icon(
                   Icons.home_outlined,
                   size: 48,
                   color: cs.onSurfaceVariant,

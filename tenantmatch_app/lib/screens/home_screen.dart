@@ -9,6 +9,9 @@ import '../widgets/app_dialog.dart';
 import '../widgets/app_top_bar.dart';
 import '../widgets/toast.dart';
 
+/// Reusable shadow color to avoid `withOpacity` allocations on every build.
+const Color _cardShadowColor = Color(0x0A1A2B4C); // Color(0xFF1A2B4C).withOpacity(0.04)
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -171,8 +174,8 @@ class _HomeScreenState extends State<HomeScreen> {
           color: cs.surface,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: cs.outlineVariant),
-          boxShadow: [
-            BoxShadow(color: Color(0xFF1A2B4C).withOpacity(0.04), blurRadius: 12, offset: Offset(0, 4)),
+          boxShadow: const [
+            BoxShadow(color: _cardShadowColor, blurRadius: 12, offset: Offset(0, 4)),
           ],
         ),
         child: Column(
