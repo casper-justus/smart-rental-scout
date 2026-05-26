@@ -91,7 +91,7 @@ class _ComparePropertiesScreenState extends State<ComparePropertiesScreen> {
                             _compareRow('Pets', p.petsOk ? 'Yes' : 'No', context),
                             SizedBox(height: 12),
                             GestureDetector(
-                              onTap: () => Navigator.pushNamed(context, '/listing-details'),
+                              onTap: () => Navigator.pushNamed(context, '/listing-details', arguments: p.id),
                               child: Container(
                                 width: double.infinity, padding: EdgeInsets.symmetric(vertical: 12),
                                 decoration: BoxDecoration(color: cs.primary, borderRadius: BorderRadius.circular(8)),

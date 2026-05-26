@@ -29,12 +29,13 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final props = PropertyListing.sampleProperties;
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, _) {
         if (didPop) return;
         final now = DateTime.now();
-        if (_lastBackPress != null && now.difference(_lastBackPress!) < Duration(seconds: 2)) {
+        if (_lastBackPress != null && now.difference(_lastBackPress!) < const Duration(seconds: 2)) {
           SystemNavigator.pop();
         } else {
           _lastBackPress = now;
@@ -49,6 +50,7 @@ class _HomeScreenState extends State<HomeScreen> {
             Expanded(
               child: ListView(
                 padding: EdgeInsets.symmetric(horizontal: AppTheme.containerMargin),
+                physics: const BouncingScrollPhysics(),
                 children: [
                   AppTopBar(showBack: false),
                   SizedBox(height: AppTheme.spacingMd),
@@ -61,7 +63,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   SizedBox(height: AppTheme.spacingLg),
                   _buildQuickActions(context),
                   SizedBox(height: AppTheme.spacingLg),
-                  _buildTopMatches(context),
+                  _buildTopMatches(context, props),
                   SizedBox(height: AppTheme.spacingLg),
                   _buildMarketInsights(context),
                   SizedBox(height: AppTheme.spacingLg),
@@ -103,12 +105,16 @@ class _HomeScreenState extends State<HomeScreen> {
                 hintText: 'Search neighborhoods, ZIP codes...',
                 hintStyle: AppTextStyle.bodyMd.copyWith(color: cs.onSurfaceVariant),
               ),
-              onSubmitted: (_) => Navigator.pushNamed(context, '/search'),
+              textInputAction: TextInputAction.search,
+              onSubmitted: (query) => Navigator.pushNamed(
+                context, '/search',
+                arguments: query,
+              ),
             ),
           ),
           SizedBox(width: AppTheme.spacingSm),
           GestureDetector(
-            onTap: () => showAppAlert(context, 'Filters', 'Price Range: \$500 - \$5,000\nBedrooms: 1-4\nProperty Type: Apartment, House, Condo\nAmenities: Parking, Gym, Laundry, Pets'),
+            onTap: () => Navigator.pushNamed(context, '/search', arguments: _searchCtrl.text),
             child: Container(
               padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
@@ -140,6 +146,7 @@ class _HomeScreenState extends State<HomeScreen> {
           height: 120,
           child: ListView(
             scrollDirection: Axis.horizontal,
+            physics: const BouncingScrollPhysics(),
             children: [
               _actionCard(Icons.directions_transit, 'Commute Hub', 'Check your routes', context, () => Navigator.pushNamed(context, '/commute-hub')),
               SizedBox(width: AppTheme.gutter),
@@ -189,9 +196,8 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildTopMatches(BuildContext context) {
+  Widget _buildTopMatches(BuildContext context, List<PropertyListing> props) {
     final cs = Theme.of(context).colorScheme;
-    final p = PropertyListing.sampleProperties[0];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -212,16 +218,20 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
         SizedBox(height: AppTheme.spacingMd),
-        PropertyCard(
-          property: p,
-          isFavorite: favoritesService.isFavorite(p.id),
-          onTap: () => Navigator.pushNamed(context, '/listing-details'),
-          onFavoriteTap: () async {
-            await favoritesService.toggle(p.id);
-            setState(() {});
-          },
-          showTenantScore: true,
-        ),
+        // Show top 3 properties in a vertical list
+        ...props.take(3).map((p) => Padding(
+          padding: EdgeInsets.only(bottom: AppTheme.gutter),
+          child: PropertyCard(
+            property: p,
+            isFavorite: favoritesService.isFavorite(p.id),
+            onTap: () => Navigator.pushNamed(context, '/listing-details', arguments: p.id),
+            onFavoriteTap: () async {
+              await favoritesService.toggle(p.id);
+              setState(() {});
+            },
+            showTenantScore: p.tenantScore > 85,
+          ),
+        )),
       ],
     );
   }

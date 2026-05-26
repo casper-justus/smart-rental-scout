@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'theme/app_theme.dart';
 import 'services/theme_service.dart';
+import 'widgets/app_route_transitions.dart';
 import 'screens/splash_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/map_search_screen.dart';
@@ -37,7 +38,7 @@ class TenantMatchApp extends StatelessWidget {
             switch (settings.name) {
               case '/splash':
                 screen = const SplashScreen();
-                break;
+                return AppRouteTransitions.fadeIn(screen, settings);
               case '/discovery':
                 screen = const DiscoveryCommuteSetupScreen();
                 break;
@@ -51,7 +52,8 @@ class TenantMatchApp extends StatelessWidget {
                 screen = const MapSearchScreen();
                 break;
               case '/listing-details':
-                screen = const ListingDetailsScreen();
+                final propId = settings.arguments as String? ?? 'prop_1';
+                screen = ListingDetailsScreen(propertyId: propId);
                 break;
               case '/saved':
                 screen = const SavedSearchesScreen();
@@ -64,7 +66,7 @@ class TenantMatchApp extends StatelessWidget {
                 break;
               case '/virtual-tour':
                 screen = const VirtualTourScreen();
-                break;
+                return AppRouteTransitions.scaleIn(screen, settings);
               case '/app-step1':
                 screen = const ApplicationPortalStep1Screen();
                 break;
@@ -83,10 +85,8 @@ class TenantMatchApp extends StatelessWidget {
               default:
                 screen = const HomeScreen();
             }
-            return MaterialPageRoute(
-              builder: (_) => screen,
-              settings: settings,
-            );
+            // Default transition: slide from right
+            return AppRouteTransitions.slideInFromRight(screen, settings);
           },
         );
       },

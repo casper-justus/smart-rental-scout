@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import '../widgets/bottom_nav.dart';
-import '../widgets/app_dialog.dart';
 import '../widgets/app_top_bar.dart';
 import '../models/property.dart';
 import '../main.dart';
@@ -58,7 +57,7 @@ class _SavedSearchesScreenState extends State<SavedSearchesScreen> {
                           onTap: () async { await favoritesService.toggle(p.id); setState(() {}); },
                           child: Icon(Icons.favorite, color: cs.error),
                         ),
-                        onTap: () => Navigator.pushNamed(context, '/listing-details'),
+                        onTap: () => Navigator.pushNamed(context, '/listing-details', arguments: p.id),
                       ),
                     )),
                 ],

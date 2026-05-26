@@ -1,26 +1,33 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
-import '../widgets/app_dialog.dart';
+
 import '../widgets/app_top_bar.dart';
 import '../widgets/toast.dart';
 import '../models/property.dart';
 import '../main.dart';
 
 class ListingDetailsScreen extends StatefulWidget {
-  const ListingDetailsScreen({super.key});
+  final String propertyId;
+
+  const ListingDetailsScreen({super.key, this.propertyId = 'prop_1'});
 
   @override
   State<ListingDetailsScreen> createState() => _ListingDetailsScreenState();
 }
 
 class _ListingDetailsScreenState extends State<ListingDetailsScreen> {
-  final p = PropertyListing.sampleProperties[0];
+  late PropertyListing p;
   late bool _isFav;
 
   @override
   void initState() {
     super.initState();
+    p = PropertyListing.fromId(widget.propertyId);
     _isFav = favoritesService.isFavorite(p.id);
+  }
+
+  void _refreshFav() {
+    setState(() => _isFav = favoritesService.isFavorite(p.id));
   }
 
   @override
@@ -34,10 +41,11 @@ class _ListingDetailsScreenState extends State<ListingDetailsScreen> {
             AppTopBar(showBack: true),
             Expanded(
               child: ListView(
+                physics: const BouncingScrollPhysics(),
                 children: [
                   // Hero image
-                  Semantics(
-                    label: 'Property image of ${p.address}',
+                  Hero(
+                    tag: 'property_img_${p.id}',
                     child: Stack(
                       children: [
                         Container(
@@ -49,28 +57,28 @@ class _ListingDetailsScreenState extends State<ListingDetailsScreen> {
                               errorBuilder: (_, __, ___) => Icon(Icons.home,
                                   size: 64, color: cs.onSurfaceVariant)),
                         ),
-                        if (p.isHot)
-                          Semantics(
-                            label: 'Hot property',
-                            child: Positioned(
-                              top: 12,
-                              left: 12,
-                              child: Container(
-                                padding: EdgeInsets.symmetric(
-                                    horizontal: 8, vertical: 4),
-                                decoration: BoxDecoration(
-                                  color: cs.surface,
-                                  borderRadius: BorderRadius.circular(999),
-                                ),
-                                child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(Icons.local_fire_department,
-                                          size: 14, color: cs.secondary),
-                                      SizedBox(width: 4),
-                                      Text('HOT', style: AppTextStyle.labelCaps),
-                                    ]),
+                        if (p.isHot || p.isGreatValue)
+                          Positioned(
+                            top: 12,
+                            left: 12,
+                            child: Container(
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: cs.surface,
+                                borderRadius: BorderRadius.circular(999),
                               ),
+                              child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      p.isHot ? Icons.local_fire_department : Icons.star,
+                                      size: 14,
+                                      color: p.chipColor,
+                                    ),
+                                    SizedBox(width: 4),
+                                    Text(p.chipLabel, style: AppTextStyle.labelCaps.copyWith(color: p.chipColor)),
+                                  ]),
                             ),
                           ),
                         Semantics(
@@ -110,7 +118,7 @@ class _ListingDetailsScreenState extends State<ListingDetailsScreen> {
                             child: GestureDetector(
                               onTap: () async {
                                 await favoritesService.toggle(p.id);
-                                setState(() => _isFav = !_isFav);
+                                _refreshFav();
                                 showToast(
                                     context,
                                     _isFav
@@ -173,50 +181,54 @@ class _ListingDetailsScreenState extends State<ListingDetailsScreen> {
                               style: AppTextStyle.bodyMd
                                   .copyWith(color: cs.onSurfaceVariant)),
                         ),
+                        SizedBox(height: 8),
+                        // Neighborhood & Type chips
+                        Row(children: [
+                          if (p.neighborhood.isNotEmpty)
+                            _infoChip(Icons.location_city, p.neighborhood, context),
+                          if (p.neighborhood.isNotEmpty) SizedBox(width: 8),
+                          _infoChip(Icons.business, p.type, context),
+                        ]),
                         SizedBox(height: AppTheme.spacingMd),
 
                         // Action buttons
-                        Semantics(
-                          label: 'Schedule a tour',
-                          button: true,
-                          child: Row(children: [
-                            Expanded(
-                              child: GestureDetector(
-                                onTap: () => showToast(
-                                    context, 'Tour request sent!'),
-                                child: Container(
-                                  padding: EdgeInsets.symmetric(vertical: 14),
-                                  decoration: BoxDecoration(
-                                    border: Border.all(color: cs.secondary),
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Text('Schedule Tour',
-                                      textAlign: TextAlign.center,
-                                      style: AppTextStyle.headlineSm
-                                          .copyWith(color: cs.secondary)),
+                        Row(children: [
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () => showToast(
+                                  context, 'Tour request sent!'),
+                              child: Container(
+                                padding: EdgeInsets.symmetric(vertical: 14),
+                                decoration: BoxDecoration(
+                                  border: Border.all(color: cs.secondary),
+                                  borderRadius: BorderRadius.circular(12),
                                 ),
+                                child: Text('Schedule Tour',
+                                    textAlign: TextAlign.center,
+                                    style: AppTextStyle.headlineSm
+                                        .copyWith(color: cs.secondary)),
                               ),
                             ),
-                            SizedBox(width: AppTheme.gutter),
-                            Expanded(
-                              child: GestureDetector(
-                                onTap: () =>
-                                    Navigator.pushNamed(context, '/app-step1'),
-                                child: Container(
-                                  padding: EdgeInsets.symmetric(vertical: 14),
-                                  decoration: BoxDecoration(
-                                    color: cs.primary,
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Text('Apply Now',
-                                      textAlign: TextAlign.center,
-                                      style: AppTextStyle.headlineSm
-                                          .copyWith(color: cs.onPrimary)),
+                          ),
+                          SizedBox(width: AppTheme.gutter),
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () =>
+                                  Navigator.pushNamed(context, '/app-step1'),
+                              child: Container(
+                                padding: EdgeInsets.symmetric(vertical: 14),
+                                decoration: BoxDecoration(
+                                  color: cs.primary,
+                                  borderRadius: BorderRadius.circular(12),
                                 ),
+                                child: Text('Apply Now',
+                                    textAlign: TextAlign.center,
+                                    style: AppTextStyle.headlineSm
+                                        .copyWith(color: cs.onPrimary)),
                               ),
                             ),
-                          ]),
-                        ),
+                          ),
+                        ]),
                         SizedBox(height: AppTheme.spacingLg),
 
                         // Perk chips
@@ -305,6 +317,28 @@ class _ListingDetailsScreenState extends State<ListingDetailsScreen> {
                           ),
                         SizedBox(height: AppTheme.spacingMd),
 
+                        // Virtual Tour
+                        GestureDetector(
+                          onTap: () => Navigator.pushNamed(context, '/virtual-tour'),
+                          child: Container(
+                            padding: EdgeInsets.symmetric(vertical: 14),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: cs.outlineVariant),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.view_in_ar, color: cs.primary),
+                                  SizedBox(width: 4),
+                                  Text('Virtual Tour',
+                                      style: AppTextStyle.headlineSm
+                                          .copyWith(color: cs.primary)),
+                                ]),
+                          ),
+                        ),
+                        SizedBox(height: AppTheme.spacingMd),
+
                         // Add to Compare
                         Semantics(
                           label: 'Add this property to comparison',
@@ -342,6 +376,25 @@ class _ListingDetailsScreenState extends State<ListingDetailsScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _infoChip(IconData icon, String label, BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: AppTheme.surfaceContainerLowOf(context),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: cs.primary),
+          SizedBox(width: 4),
+          Text(label, style: AppTextStyle.bodyMd.copyWith(fontSize: 12, color: cs.onSurfaceVariant)),
+        ],
       ),
     );
   }
