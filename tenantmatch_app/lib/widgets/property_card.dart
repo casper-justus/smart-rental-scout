@@ -63,9 +63,9 @@ class PropertyCard extends StatelessWidget {
     );
   }
 
-  Widget _buildImageSection(BuildContext context) {
+Widget _buildImageSection(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final imgHeight = compact ? 120 : 160;
+    final imgHeight = compact ? 100 : 160; // Reduced from 120 to 100 in compact mode to accommodate address
     // Decode images at reasonable sizes for performance
     final decodeWidth = compact ? 300 : 400;
     final decodeHeight = compact ? 180 : 240;
@@ -90,37 +90,11 @@ class PropertyCard extends StatelessWidget {
                 placeholder: (_, __) => Container(
                   color: AppTheme.surfaceContainerOf(context),
                 ),
-                errorWidget: (_, __, ___) => Icon(
+                errorBuilder: (_, __, ___) => Icon(
                   Icons.home_outlined,
                   size: 48,
                   color: cs.onSurfaceVariant,
                 ),
-              ),
-            ),
-          ),
-          // Gradient overlay at bottom for name label
-          Positioned(
-            left: 0, right: 0, bottom: 0,
-            child: Container(
-              height: 48,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [Colors.transparent, Colors.black.withOpacity(0.6)],
-                ),
-              ),
-              padding: const EdgeInsets.only(left: 12, right: 12, bottom: 8),
-              alignment: Alignment.bottomLeft,
-              child: Text(
-                property.address,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
               ),
             ),
           ),
@@ -194,6 +168,29 @@ class PropertyCard extends StatelessWidget {
                 ),
               ),
             ),
+          // Address below image (only in compact mode to keep height at 120)
+          if (compact)
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: Container(
+                height: 20,
+                color: Colors.black.withOpacity(0.6),
+                padding: const EdgeInsets.only(left: 8, right: 8, bottom: 4),
+                alignment: Alignment.bottomLeft,
+                child: Text(
+                  property.address,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ),
           // Favorite button (top-right)
           Semantics(
             label: isFavorite ? 'Remove from favorites' : 'Add to favorites',
@@ -222,7 +219,6 @@ class PropertyCard extends StatelessWidget {
             ),
           ),
         ],
-      ),
       ),
     );
   }

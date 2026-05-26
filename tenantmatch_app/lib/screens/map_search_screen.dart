@@ -68,6 +68,9 @@ class _MapSearchScreenState extends State<MapSearchScreen> {
       }
     } catch (_) {
       // Location unavailable — fall back to default center
+      if (mounted) {
+        showToast(context, 'Could not get current location. Using default.');
+      }
     }
   }
 
@@ -84,7 +87,10 @@ class _MapSearchScreenState extends State<MapSearchScreen> {
         showToast(context, '📍 Centered on your location');
       }
     } catch (_) {
-      showToast(context, 'Could not get your location');
+      // Location unavailable — show error toast
+      if(mounted) {
+        showToast(context, 'Could not get your location');
+      }
     }
   }
 
@@ -164,145 +170,150 @@ class _MapSearchScreenState extends State<MapSearchScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // Search bar
-            Padding(
-              padding: EdgeInsets.fromLTRB(AppTheme.containerMargin, 8, AppTheme.containerMargin, 4),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: cs.surface,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: cs.outlineVariant),
-                ),
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                child: Row(
-                  children: [
-                    Icon(Icons.search, color: cs.onSurfaceVariant),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: TextField(
-                        controller: _searchCtrl,
-                        decoration: InputDecoration.collapsed(
-                          hintText: 'Search by address, neighborhood, price...',
-                          hintStyle: AppTextStyle.bodyMd.copyWith(color: cs.onSurfaceVariant),
-                        ),
-                        textInputAction: TextInputAction.search,
-                        onChanged: _onSearchChanged,
-                      ),
-                    ),
-                    // Filter button with badge
-                    Stack(
-                      children: [
-                        GestureDetector(
-                          onTap: () {
-                            showModalBottomSheet<FilterOptions>(
-                              context: context,
-                              isScrollControlled: true,
-                              backgroundColor: Colors.transparent,
-                              builder: (_) => FilterBottomSheet(
-                                current: _filters,
-                                onApply: (f) => _applyFilters(f),
-                              ),
-                            );
-                          },
-                          child: Container(
-                            width: 36, height: 36,
-                            decoration: BoxDecoration(
-                              color: activeFilterCount > 0 ? cs.primary : cs.surface,
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(
-                                color: activeFilterCount > 0 ? cs.primary : cs.outlineVariant,
-                              ),
-                            ),
-                            child: Icon(
-                              Icons.tune,
-                              size: 18,
-                              color: activeFilterCount > 0 ? cs.onPrimary : cs.onSurfaceVariant,
-                            ),
-                          ),
-                        ),
-                        if (activeFilterCount > 0)
-                          Positioned(
-                            top: -2, right: -2,
-                            child: Container(
-                              width: 18, height: 18,
-                              decoration: BoxDecoration(
-                                color: cs.error,
-                                shape: BoxShape.circle,
-                              ),
-                              child: Text(
-                                '$activeFilterCount',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  color: cs.onError,
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                  ],
+  Widget _buildSearchBar(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final suggestions = _filteredProps.take(5).toList(); // Show top 5 suggestions
+    final activeFilterCount = _filters.activeCount;
+    final showSuggestions = _searchCtrl.text.isNotEmpty && suggestions.isNotEmpty;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          decoration: BoxDecoration(
+            color: cs.surface,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: cs.outlineVariant),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+          child: Row(
+            children: [
+              Icon(Icons.search, color: cs.onSurfaceVariant),
+              const SizedBox(width: 8),
+              Expanded(
+                child: TextField(
+                  controller: _searchCtrl,
+                  decoration: InputDecoration.collapsed(
+                    hintText: 'Search by address, neighborhood, price...',
+                    hintStyle: AppTextStyle.bodyMd.copyWith(color: cs.onSurfaceVariant),
+                  ),
+                  textInputAction: TextInputAction.search,
+                  onChanged: _onSearchChanged,
                 ),
               ),
-            ),
-            // Results count & toggle
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppTheme.containerMargin, vertical: 4),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              // Filter button with badge
+              Stack(
                 children: [
-                  Text(
-                    '${_filteredProps.length} properties found',
-                    style: AppTextStyle.bodyMd.copyWith(color: cs.onSurfaceVariant),
-                  ),
                   GestureDetector(
-                    onTap: () => setState(() => _showList = !_showList),
+                    onTap: () {
+                      showModalBottomSheet<FilterOptions>(
+                        context: context,
+                        isScrollControlled: true,
+                        backgroundColor: Colors.transparent,
+                        builder: (_) => FilterBottomSheet(
+                          current: _filters,
+                          onApply: (f) => _applyFilters(f),
+                        ),
+                      );
+                    },
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      width: 36, height: 36,
                       decoration: BoxDecoration(
-                        color: cs.surface,
+                        color: activeFilterCount > 0 ? cs.primary : cs.surface,
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: cs.outlineVariant),
+                        border: Border.all(
+                          color: activeFilterCount > 0 ? cs.primary : cs.outlineVariant,
+                        ),
                       ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            _showList ? Icons.map : Icons.list,
-                            size: 16, color: cs.primary,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            _showList ? 'Map View' : 'List View',
-                            style: AppTextStyle.bodyMd.copyWith(
-                              color: cs.primary,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
+                      child: Icon(
+                        Icons.tune,
+                        size: 18,
+                        color: activeFilterCount > 0 ? cs.onPrimary : cs.onSurfaceVariant,
                       ),
                     ),
                   ),
+                  if (activeFilterCount > 0)
+                    Positioned(
+                      top: -2, right: -2,
+                      child: Container(
+                        width: 18, height: 18,
+                        decoration: BoxDecoration(
+                          color: cs.error,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Text(
+                          '$activeFilterCount',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: cs.onError,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                    ),
                 ],
               ),
-            ),
-            // Map or List
-            Expanded(
-              child: _showList ? _buildListView(context) : _buildMapView(context),
-            ),
-            // Bottom nav
-            AppBottomNav(
-              currentIndex: 1,
-              onTap: (i) {
-                if (i == 0) Navigator.pushNamed(context, '/home');
-                if (i == 2) Navigator.pushNamed(context, '/saved');
-                if (i == 3) Navigator.pushNamed(context, '/profile');
-              },
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
+        // Suggestions dropdown
+        if (showSuggestions)
+          Container(
+            margin: const EdgeInsets.only(top: 8),
+            decoration: BoxDecoration(
+              color: cs.surface,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: cs.outlineVariant),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ...suggestions.map((p) {
+                  final isSelected = _selectedProperty?.id == p.id;
+                  return ListTile(
+                    onTap: () {
+                      _selectProperty(p);
+                      _searchCtrl.clear();
+                    },
+                    dense: true,
+                    leading: ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: SizedBox(
+                        width: 40, height: 40,
+                        child: CachedNetworkImage(
+                          imageUrl: p.imageUrl,
+                          fit: BoxFit.cover,
+                          memCacheWidth: 80,
+                          memCacheHeight: 80,
+                          placeholder: (_, __) => Container(
+                            color: AppTheme.surfaceContainerOf(context),
+                          ),
+                          errorBuilder: (_, __, ___) => Icon(Icons.home, color: cs.onSurfaceVariant, size: 20),
+                        ),
+                      ),
+                    ),
+                    title: Text(
+                      p.address,
+                      style: AppTextStyle.bodyMd.copyWith(color: cs.onSurface),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    subtitle: Text(
+                      p.price,
+                      style: AppTextStyle.bodyMd.copyWith(color: cs.onSurfaceVariant),
+                    ),
+                    trailing: Icon(
+                      isSelected ? Icons.check_circle : Icons.add_circle,
+                      color: cs.primary,
+                      size: 20,
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+          ),
+      ],
     );
   }
 
@@ -398,7 +409,7 @@ class _MapSearchScreenState extends State<MapSearchScreen> {
           Positioned(
             left: AppTheme.containerMargin,
             right: AppTheme.containerMargin,
-            bottom: 170,
+            bottom: 200, // Increased from 170 to avoid overlap with zoom controls
             child: _PropertySummaryCard(
               property: _selectedProperty!,
               onTap: () => Navigator.pushNamed(context, '/listing-details', arguments: _selectedProperty!.id),
