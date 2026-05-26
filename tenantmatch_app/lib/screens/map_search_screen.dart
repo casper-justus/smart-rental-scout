@@ -266,9 +266,10 @@ class _MapSearchScreenState extends State<MapSearchScreen> {
 
     return Stack(
       children: [
-        // Real map
-        FlutterMap(
-          mapController: _mapCtrl,
+        // Real map — Positioned.fill ensures FlutterMap gets proper constraints inside Stack
+        Positioned.fill(
+          child: FlutterMap(
+            mapController: _mapCtrl,
           options: MapOptions(
             initialCenter: _defaultCenter,
             initialZoom: _defaultZoom,
@@ -335,6 +336,7 @@ class _MapSearchScreenState extends State<MapSearchScreen> {
               }).toList(),
             ),
           ],
+          ),
         ),
         // Zoom controls
         Positioned(
