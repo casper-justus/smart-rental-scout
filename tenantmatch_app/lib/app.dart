@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'theme/app_theme.dart';
 import 'services/theme_service.dart';
+import 'screens/splash_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/map_search_screen.dart';
 import 'screens/listing_details_screen.dart';
@@ -30,10 +31,13 @@ class TenantMatchApp extends StatelessWidget {
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
           themeMode: ThemeService.modeNotifier.value,
-          initialRoute: '/home',
+          initialRoute: '/splash',
           onGenerateRoute: (settings) {
             Widget screen;
             switch (settings.name) {
+              case '/splash':
+                screen = const SplashScreen();
+                break;
               case '/discovery':
                 screen = const DiscoveryCommuteSetupScreen();
                 break;

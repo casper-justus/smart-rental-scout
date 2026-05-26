@@ -7,6 +7,7 @@ import '../models/property.dart';
 import '../main.dart';
 import '../widgets/app_dialog.dart';
 import '../widgets/app_top_bar.dart';
+import '../widgets/toast.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -37,13 +38,7 @@ class _HomeScreenState extends State<HomeScreen> {
           SystemNavigator.pop();
         } else {
           _lastBackPress = now;
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Press back again to exit'),
-              behavior: SnackBarBehavior.floating,
-              duration: Duration(seconds: 2),
-            ),
-          );
+          showToast(context, 'Press back again to exit');
         }
       },
       child: Scaffold(

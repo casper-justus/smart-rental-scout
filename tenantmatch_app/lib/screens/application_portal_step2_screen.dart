@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import '../widgets/app_top_bar.dart';
+import '../widgets/toast.dart';
 
 class ApplicationPortalStep2Screen extends StatefulWidget {
   const ApplicationPortalStep2Screen({super.key});
@@ -56,7 +57,7 @@ class _ApplicationPortalStep2ScreenState extends State<ApplicationPortalStep2Scr
                       SizedBox(height: 12),
                       GestureDetector(
                         onTap: () {
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('File upload triggered!'), behavior: SnackBarBehavior.floating));
+                          showToast(context, 'File upload triggered!');
                         },
                         child: Container(
                           padding: EdgeInsets.all(AppTheme.spacingLg),
@@ -105,7 +106,7 @@ class _ApplicationPortalStep2ScreenState extends State<ApplicationPortalStep2Scr
                       GestureDetector(
                         onTap: () {
                           setState(() => _uploadedDocs.add('Document_${_uploadedDocs.length + 1}.pdf'));
-                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Document added!'), behavior: SnackBarBehavior.floating));
+                          showToast(context, 'Document added!');
                         },
                         child: Container(
                           padding: EdgeInsets.symmetric(vertical: 16),

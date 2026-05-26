@@ -3,6 +3,7 @@ import '../theme/app_theme.dart';
 import '../services/theme_service.dart';
 import '../widgets/app_dialog.dart';
 import '../widgets/app_top_bar.dart';
+import '../widgets/toast.dart';
 
 class UserProfileScreen extends StatefulWidget {
   const UserProfileScreen({super.key});
@@ -51,7 +52,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
               title: 'Profile',
               actions: [
                 GestureDetector(
-                  onTap: () => ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Profile saved!'), behavior: SnackBarBehavior.floating)),
+                  onTap: () => showToast(context, 'Profile saved!'),
                   child: Container(
                     width: 36, height: 36,
                     decoration: BoxDecoration(color: AppTheme.surfaceContainerLowOf(context), shape: BoxShape.circle),
@@ -74,7 +75,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                         ),
                         Positioned(bottom: 0, right: 0,
                           child: GestureDetector(
-                            onTap: () => ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Photo upload triggered!'), behavior: SnackBarBehavior.floating)),
+                            onTap: () => showToast(context, 'Photo upload triggered!'),
                             child: Container(
                               padding: EdgeInsets.all(4),
                               decoration: BoxDecoration(color: cs.primary, shape: BoxShape.circle),
@@ -99,7 +100,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                   _themeRow(context),
                   SizedBox(height: AppTheme.spacingLg),
                   GestureDetector(
-                    onTap: () { ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Profile saved!'), behavior: SnackBarBehavior.floating)); },
+                    onTap: () { showToast(context, 'Profile saved!'); },
                     child: Container(
                       width: double.infinity,
                       padding: EdgeInsets.symmetric(vertical: 16),

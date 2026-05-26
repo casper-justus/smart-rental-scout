@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 import '../models/property.dart';
+import '../main.dart';
 
 class PropertyCard extends StatelessWidget {
   final PropertyListing property;
@@ -21,215 +22,293 @@ class PropertyCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        decoration: BoxDecoration(
-          color: cs.surface,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: cs.outlineVariant),
-          boxShadow: [
-            BoxShadow(
-              color: Color(0xFF1A2B4C).withOpacity(0.04),
-              blurRadius: 12,
-              offset: Offset(0, 4),
-            ),
-          ],
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Stack(
-              children: [
-                Container(
-                  height: 160,
-                  width: double.infinity,
-                  color: AppTheme.surfaceContainerOf(context),
-                  child: Image.network(
-                    property.imageUrl,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => Icon(
-                      Icons.home_outlined,
-                      size: 48,
-                      color: cs.onSurfaceVariant,
-                    ),
-                  ),
-                ),
-                if (property.isHot)
-                  Positioned(
-                    top: 12,
-                    left: 12,
+    return Semantics(
+      label: 'Property: ${property.price}, ${property.address}. ${property.beds} bedrooms, ${property.baths} bathrooms, ${property.sqft} square feet${property.petsOk ? ', pets allowed' : ''}',
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          decoration: BoxDecoration(
+            color: cs.surface,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: cs.outlineVariant),
+            boxShadow: [
+              BoxShadow(
+                color: Color(0xFF1A2B4C).withOpacity(0.04),
+                blurRadius: 12,
+                offset: Offset(0, 4),
+              ),
+            ],
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Image section
+              Stack(
+                children: [
+                  Semantics(
+                    label: 'Property image',
+                    excludeSemantics: true,
                     child: Container(
-                      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: cs.surface,
-                        borderRadius: BorderRadius.circular(999),
-                        border: Border.all(color: cs.outlineVariant),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.local_fire_department,
-                              size: 14, color: cs.secondary),
-                          SizedBox(width: 4),
-                          Text('HOT',
-                              style: AppTextStyle.labelCaps
-                                  .copyWith(color: cs.onSurface)),
-                        ],
+                      height: 160,
+                      width: double.infinity,
+                      color: AppTheme.surfaceContainerOf(context),
+                      child: Image.network(
+                        property.imageUrl,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => Icon(
+                          Icons.home_outlined,
+                          size: 48,
+                          color: cs.onSurfaceVariant,
+                        ),
                       ),
                     ),
                   ),
-                if (showTenantScore)
-                  Positioned(
-                    bottom: 12,
-                    left: 12,
-                    child: Container(
-                      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: cs.secondaryContainer,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.analytics_outlined,
-                              size: 16, color: cs.onSecondaryContainer),
-                          SizedBox(width: 4),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                  if (property.isHot)
+                    Semantics(
+                      label: 'Hot property',
+                      child: Positioned(
+                        top: 12,
+                        left: 12,
+                        child: Container(
+                          padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: cs.surface,
+                            borderRadius: BorderRadius.circular(999),
+                            border: Border.all(color: cs.outlineVariant),
+                          ),
+                          child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Text('TENANT SCORE',
-                                  style: AppTextStyle.labelCaps.copyWith(
-                                    color: cs.onSecondaryContainer,
-                                    fontSize: 10,
-                                  )),
-                              Text('${property.tenantScore}/100',
-                                  style: AppTextStyle.headlineSm.copyWith(
-                                    color: cs.onSecondaryContainer,
-                                  )),
+                              Icon(Icons.local_fire_department,
+                                  size: 14, color: cs.secondary),
+                              SizedBox(width: 4),
+                              Text('HOT',
+                                  style: AppTextStyle.labelCaps
+                                      .copyWith(color: cs.onSurface)),
                             ],
                           ),
-                        ],
-                      ),
-                    ),
-                  ),
-                Positioned(
-                  top: 12,
-                  right: 12,
-                  child: GestureDetector(
-                    onTap: onFavoriteTap,
-                    child: Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: cs.surface.withOpacity(0.8),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        isFavorite ? Icons.favorite : Icons.favorite_border,
-                        color: isFavorite
-                            ? cs.error
-                            : cs.onSurfaceVariant,
-                        size: 20,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            Padding(
-              padding: EdgeInsets.all(12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        property.price,
-                        style: AppTextStyle.headlineMd
-                            .copyWith(color: cs.primary),
-                      ),
-                      if (property.transitScore > 0)
-                        Row(
-                          children: [
-                            Icon(Icons.directions_walk,
-                                size: 16, color: cs.onSurfaceVariant),
-                            SizedBox(width: 2),
-                            Text('${property.transitScore}',
-                                style: AppTextStyle.labelCaps),
-                          ],
-                        ),
-                    ],
-                  ),
-                  SizedBox(height: 4),
-                  Text(
-                    property.address,
-                    style: AppTextStyle.bodyMd
-                        .copyWith(color: cs.onSurfaceVariant),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  SizedBox(height: 12),
-                  Row(
-                    children: [
-                      _buildPerkChip('${property.beds}', 'BED', context),
-                      SizedBox(width: 8),
-                      _buildPerkChip('${property.baths}', 'BATH', context),
-                      SizedBox(width: 8),
-                      _buildPerkChip('${property.sqft}', 'SQFT', context),
-                      if (property.petsOk) ...[
-                        SizedBox(width: 8),
-                        _buildPerkChip(null, 'PETS OK',
-                            context, icon: Icons.pets),
-                      ],
-                    ],
-                  ),
-                  if (property.insight.isNotEmpty) ...[
-                    SizedBox(height: 12),
-                    Container(
-                      padding: EdgeInsets.only(top: 12),
-                      decoration: BoxDecoration(
-                        border: Border(
-                          top: BorderSide(color: cs.outlineVariant),
                         ),
                       ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Icon(Icons.lightbulb_outline,
-                              size: 20, color: cs.secondary),
-                          SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              property.insight,
-                              style: AppTextStyle.bodyMd
-                                  .copyWith(color: cs.onSurface),
-                            ),
+                    ),
+                  if (showTenantScore)
+                    Semantics(
+                      label: 'Tenant score: ${property.tenantScore} out of 100',
+                      child: Positioned(
+                        bottom: 12,
+                        left: 12,
+                        child: Container(
+                          padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: cs.secondaryContainer,
+                            borderRadius: BorderRadius.circular(8),
                           ),
-                        ],
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.analytics_outlined,
+                                  size: 16, color: cs.onSecondaryContainer),
+                              SizedBox(width: 4),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text('TENANT SCORE',
+                                      style: AppTextStyle.labelCaps.copyWith(
+                                        color: cs.onSecondaryContainer,
+                                        fontSize: 10,
+                                      )),
+                                  Text('${property.tenantScore}/100',
+                                      style: AppTextStyle.headlineSm.copyWith(
+                                        color: cs.onSecondaryContainer,
+                                      )),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                     ),
-                  ],
+                  Semantics(
+                    label: isFavorite ? 'Remove from favorites' : 'Add to favorites',
+                    button: true,
+                    child: Positioned(
+                      top: 12,
+                      right: 12,
+                      child: GestureDetector(
+                        onTap: onFavoriteTap,
+                        child: Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: cs.surface.withOpacity(0.8),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            isFavorite ? Icons.favorite : Icons.favorite_border,
+                            color: isFavorite
+                                ? cs.error
+                                : cs.onSurfaceVariant,
+                            size: 20,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               ),
-            ),
-          ],
+              // Details section
+              Padding(
+                padding: EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Price and transit score
+                    Semantics(
+                      label: 'Price ${property.price}, Transit score ${property.transitScore}',
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            property.price,
+                            style: AppTextStyle.headlineMd
+                                .copyWith(color: cs.primary),
+                          ),
+                          if (property.transitScore > 0)
+                            Row(
+                              children: [
+                                Icon(Icons.directions_walk,
+                                    size: 16, color: cs.onSurfaceVariant),
+                                SizedBox(width: 2),
+                                Text('${property.transitScore}',
+                                    style: AppTextStyle.labelCaps),
+                              ],
+                            ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 4),
+                    // Address
+                    Semantics(
+                      label: 'Address: ${property.address}',
+                      child: Text(
+                        property.address,
+                        style: AppTextStyle.bodyMd
+                            .copyWith(color: cs.onSurfaceVariant),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    SizedBox(height: 12),
+                    // Perk chips
+                    Semantics(
+                      label: 'Property details: ${property.beds} beds, ${property.baths} baths, ${property.sqft} square feet${property.petsOk ? ', pets ok' : ''}',
+                      child: Row(
+                        children: [
+                          _buildPerkChip('${property.beds}', 'BED', context),
+                          SizedBox(width: 8),
+                          _buildPerkChip('${property.baths}', 'BATH', context),
+                          SizedBox(width: 8),
+                          _buildPerkChip('${property.sqft}', 'SQFT', context),
+                          if (property.petsOk) ...[
+                            SizedBox(width: 8),
+                            _buildPerkChip(null, 'PETS OK', context,
+                                icon: Icons.pets),
+                          ],
+                        ],
+                      ),
+                    ),
+                    // Commute times
+                    if (commuteService.destinations.isNotEmpty) ...[
+                      SizedBox(height: 10),
+                      _buildCommuteTimes(context),
+                    ],
+                    // Insight
+                    if (property.insight.isNotEmpty) ...[
+                      SizedBox(height: 12),
+                      Container(
+                        padding: EdgeInsets.only(top: 12),
+                        decoration: BoxDecoration(
+                          border: Border(
+                            top: BorderSide(color: cs.outlineVariant),
+                          ),
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Icon(Icons.lightbulb_outline,
+                                size: 20, color: cs.secondary),
+                            SizedBox(width: 8),
+                            Expanded(
+                              child: Semantics(
+                                label: 'Insight: ${property.insight}',
+                                child: Text(
+                                  property.insight,
+                                  style: AppTextStyle.bodyMd
+                                      .copyWith(color: cs.onSurface),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildPerkChip(String? value, String label, BuildContext context, {IconData? icon}) {
+  Widget _buildCommuteTimes(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final times = commuteService.calculateCommuteTimes(property);
+    return Semantics(
+      label: 'Commute times: ${times.map((t) => '${t.key} ${t.value} minutes').join(", ")}',
+      child: Container(
+        padding: EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: AppTheme.surfaceContainerLowOf(context),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: times.map((t) => Padding(
+            padding: const EdgeInsets.only(bottom: 2),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.directions_transit, size: 14, color: cs.secondary),
+                SizedBox(width: 4),
+                Text('${t.key}: ',
+                    style: AppTextStyle.bodyMd.copyWith(fontSize: 12)),
+                Text('${t.value} min',
+                    style: AppTextStyle.bodyMd.copyWith(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: cs.primary,
+                    )),
+              ],
+            ),
+          )).toList(),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPerkChip(String? value, String label, BuildContext context,
+      {IconData? icon}) {
     final cs = Theme.of(context).colorScheme;
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       decoration: BoxDecoration(
         color: cs.surface,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AppTheme.surfaceContainerHighestOf(context)),
+        border: Border.all(
+            color: AppTheme.surfaceContainerHighestOf(context)),
       ),
       child: icon != null
           ? Row(
