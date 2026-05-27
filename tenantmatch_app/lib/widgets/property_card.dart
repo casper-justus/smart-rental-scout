@@ -54,6 +54,8 @@ class PropertyCard extends StatelessWidget {
             children: [
               // Image section
               _buildImageSection(context),
+              // Name/Address space below image
+              _buildNameSection(context),
               // Details section — hidden in compact mode to prevent overflow
               if (!compact) _buildDetailsSection(context),
             ],
@@ -63,46 +65,68 @@ class PropertyCard extends StatelessWidget {
     );
   }
 
-Widget _buildImageSection(BuildContext context) {
+  Widget _buildImageSection(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final imgHeight = compact ? 100 : 160; // Reduced from 120 to 100 in compact mode to accommodate address
-    // Decode images at reasonable sizes for performance
+    final imgHeight = compact ? 100 : 160;
     final decodeWidth = compact ? 300 : 400;
     final decodeHeight = compact ? 180 : 240;
+    final imgs = property.images;
 
     return RepaintBoundary(
-      child: Hero(
-      tag: 'property_img_${property.id}',
       child: Stack(
         children: [
-          Semantics(
-            label: 'Property image',
-            excludeSemantics: true,
-            child: Container(
-              height: imgHeight.toDouble(),
-              width: double.infinity,
-              color: AppTheme.surfaceContainerOf(context),
-              child: CachedNetworkImage(
-                imageUrl: property.imageUrl,
-                fit: BoxFit.cover,
-                memCacheWidth: decodeWidth,
-                memCacheHeight: decodeHeight,
-                placeholder: (_, __) => Container(
-                  color: AppTheme.surfaceContainerOf(context),
-                ),
-                errorBuilder: (_, __, ___) => Icon(
-                  Icons.home_outlined,
-                  size: 48,
-                  color: cs.onSurfaceVariant,
-                ),
-              ),
+          SizedBox(
+            height: imgHeight.toDouble(),
+            child: PageView.builder(
+              itemCount: imgs.length,
+              itemBuilder: (context, index) {
+                return Hero(
+                  tag: index == 0 ? 'property_img_${property.id}' : 'property_img_${property.id}_$index',
+                  child: Container(
+                    color: AppTheme.surfaceContainerOf(context),
+                    child: CachedNetworkImage(
+                      imageUrl: imgs[index],
+                      fit: BoxFit.cover,
+                      memCacheWidth: decodeWidth,
+                      memCacheHeight: decodeHeight,
+                      placeholder: (_, __) => Container(
+                        color: AppTheme.surfaceContainerOf(context),
+                      ),
+                      errorWidget: (_, __, ___) => Icon(
+                        Icons.home_outlined,
+                        size: 48,
+                        color: cs.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                );
+              },
             ),
           ),
-          // Hot / Great Value badge (top-left)
+          // Carousel dots
+          Positioned(
+            bottom: 6,
+            left: 0, right: 0,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(imgs.length, (i) {
+                return Container(
+                  width: 16,
+                  height: 3,
+                  margin: const EdgeInsets.symmetric(horizontal: 1.5),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(i == 0 ? 0.9 : 0.4),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                );
+              }),
+            ),
+          ),
+          // Hot / Great Value badge (top-right)
           if (property.isHot || property.isGreatValue)
             Positioned(
               top: 12,
-              left: 12,
+              right: 52,
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
@@ -129,75 +153,42 @@ Widget _buildImageSection(BuildContext context) {
                 ),
               ),
             ),
-          // Tenant score (bottom-right)
+          // Tenant score (bottom-left on cards)
           if (showTenantScore)
-            Semantics(
-              label: 'Tenant score: ${property.tenantScore} out of 100',
-              child: Positioned(
-                bottom: 52,
-                right: 12,
+            Positioned(
+              bottom: 12,
+              left: 12,
+              child: Semantics(
+                label: 'Tenant score: ${property.tenantScore} out of 100',
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: cs.secondaryContainer,
-                    borderRadius: BorderRadius.circular(8),
+                    color: cs.secondaryContainer.withOpacity(0.9),
+                    borderRadius: BorderRadius.circular(6),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(Icons.analytics_outlined,
-                          size: 16, color: cs.onSecondaryContainer),
+                          size: 14, color: cs.onSecondaryContainer),
                       const SizedBox(width: 4),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text('TENANT SCORE',
-                              style: AppTextStyle.labelCaps.copyWith(
-                                color: cs.onSecondaryContainer,
-                                fontSize: 10,
-                              )),
-                          Text('${property.tenantScore}/100',
-                              style: AppTextStyle.headlineSm.copyWith(
-                                color: cs.onSecondaryContainer,
-                              )),
-                        ],
-                      ),
+                      Text('${property.tenantScore}',
+                          style: AppTextStyle.headlineSm.copyWith(
+                            color: cs.onSecondaryContainer,
+                            fontSize: 12,
+                          )),
                     ],
                   ),
                 ),
               ),
             ),
-          // Address below image (only in compact mode to keep height at 120)
-          if (compact)
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: 0,
-              child: Container(
-                height: 20,
-                color: Colors.black.withOpacity(0.6),
-                padding: const EdgeInsets.only(left: 8, right: 8, bottom: 4),
-                alignment: Alignment.bottomLeft,
-                child: Text(
-                  property.address,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w600,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ),
           // Favorite button (top-right)
-          Semantics(
-            label: isFavorite ? 'Remove from favorites' : 'Add to favorites',
-            button: true,
-            child: Positioned(
-              top: 12,
-              right: 12,
+          Positioned(
+            top: 12,
+            right: 12,
+            child: Semantics(
+              label: isFavorite ? 'Remove from favorites' : 'Add to favorites',
+              button: true,
               child: GestureDetector(
                 onTap: onFavoriteTap,
                 child: Container(
@@ -209,9 +200,7 @@ Widget _buildImageSection(BuildContext context) {
                   ),
                   child: Icon(
                     isFavorite ? Icons.favorite : Icons.favorite_border,
-                    color: isFavorite
-                        ? cs.error
-                        : cs.onSurfaceVariant,
+                    color: isFavorite ? cs.error : cs.onSurfaceVariant,
                     size: 20,
                   ),
                 ),
@@ -223,21 +212,37 @@ Widget _buildImageSection(BuildContext context) {
     );
   }
 
+  Widget _buildNameSection(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      color: cs.surface,
+      child: Text(
+        property.address,
+        style: AppTextStyle.bodyMd.copyWith(
+          color: cs.onSurface,
+          fontWeight: FontWeight.w600,
+        ),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
+    );
+  }
+
   Widget _buildDetailsSection(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return Padding(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Price and transit score
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
                 property.price,
-                style: AppTextStyle.headlineMd
-                    .copyWith(color: cs.primary),
+                style: AppTextStyle.headlineMd.copyWith(color: cs.primary),
               ),
               if (property.transitScore > 0)
                 Row(
@@ -251,17 +256,7 @@ Widget _buildImageSection(BuildContext context) {
                 ),
             ],
           ),
-          const SizedBox(height: 4),
-          // Address
-          Text(
-            property.address,
-            style: AppTextStyle.bodyMd
-                .copyWith(color: cs.onSurfaceVariant),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
           const SizedBox(height: 12),
-          // Perk chips
           Row(
             children: [
               _buildPerkChip('${property.beds}', 'BED', context),
@@ -271,17 +266,14 @@ Widget _buildImageSection(BuildContext context) {
               _buildPerkChip('${property.sqft}', 'SQFT', context),
               if (property.petsOk) ...[
                 const SizedBox(width: 8),
-                _buildPerkChip(null, 'PETS OK', context,
-                    icon: Icons.pets),
+                _buildPerkChip(null, 'PETS OK', context, icon: Icons.pets),
               ],
             ],
           ),
-          // Commute times
           if (commuteService.destinations.isNotEmpty) ...[
             const SizedBox(height: 10),
             _buildCommuteTimes(context),
           ],
-          // Insight
           if (property.insight.isNotEmpty) ...[
             const SizedBox(height: 12),
             Container(
@@ -294,16 +286,14 @@ Widget _buildImageSection(BuildContext context) {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(Icons.lightbulb_outline,
-                      size: 20, color: cs.secondary),
+                  Icon(Icons.lightbulb_outline, size: 20, color: cs.secondary),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Semantics(
                       label: 'Insight: ${property.insight}',
                       child: Text(
                         property.insight,
-                        style: AppTextStyle.bodyMd
-                            .copyWith(color: cs.onSurface),
+                        style: AppTextStyle.bodyMd.copyWith(color: cs.onSurface),
                       ),
                     ),
                   ),
@@ -334,8 +324,7 @@ Widget _buildImageSection(BuildContext context) {
             children: [
               Icon(Icons.directions_transit, size: 14, color: cs.secondary),
               const SizedBox(width: 4),
-              Text('${t.key}: ',
-                  style: AppTextStyle.bodyMd.copyWith(fontSize: 12)),
+              Text('${t.key}: ', style: AppTextStyle.bodyMd.copyWith(fontSize: 12)),
               Text('${t.value} min',
                   style: AppTextStyle.bodyMd.copyWith(
                     fontSize: 12,
@@ -349,16 +338,14 @@ Widget _buildImageSection(BuildContext context) {
     );
   }
 
-  Widget _buildPerkChip(String? value, String label, BuildContext context,
-      {IconData? icon}) {
+  Widget _buildPerkChip(String? value, String label, BuildContext context, {IconData? icon}) {
     final cs = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       decoration: BoxDecoration(
         color: cs.surface,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-            color: AppTheme.surfaceContainerHighestOf(context)),
+        border: Border.all(color: AppTheme.surfaceContainerHighestOf(context)),
       ),
       child: icon != null
           ? Row(
@@ -366,20 +353,14 @@ Widget _buildImageSection(BuildContext context) {
               children: [
                 Icon(icon, size: 16, color: cs.primary),
                 const SizedBox(width: 2),
-                Text(label,
-                    style: AppTextStyle.labelCaps
-                        .copyWith(color: cs.onSurfaceVariant)),
+                Text(label, style: AppTextStyle.labelCaps.copyWith(color: cs.onSurfaceVariant)),
               ],
             )
           : Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(value ?? '',
-                    style: AppTextStyle.headlineSm
-                        .copyWith(color: cs.primary)),
-                Text(label,
-                    style: AppTextStyle.labelCaps
-                        .copyWith(color: cs.onSurfaceVariant)),
+                Text(value ?? '', style: AppTextStyle.headlineSm.copyWith(color: cs.primary)),
+                Text(label, style: AppTextStyle.labelCaps.copyWith(color: cs.onSurfaceVariant)),
               ],
             ),
     );

@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_map_cache/flutter_map_cache.dart';
+import 'package:dio_cache_interceptor/dio_cache_interceptor.dart';
+import 'package:dio_cache_interceptor_db_store/dio_cache_interceptor_db_store.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:path_provider/path_provider.dart';
 import '../theme/app_theme.dart';
 import '../widgets/property_card.dart';
 import '../widgets/bottom_nav.dart';
@@ -23,8 +27,9 @@ class _MapSearchScreenState extends State<MapSearchScreen> {
   final MapController _mapCtrl = MapController();
   FilterOptions _filters = const FilterOptions();
   List<PropertyListing> _filteredProps = PropertyListing.sampleProperties;
-  bool _showList = false;
   PropertyListing? _selectedProperty;
+  bool _isListView = false;
+  CachedTileProvider? _tileProvider;
 
   static const _defaultCenter = LatLng(37.7749, -122.4194);
   static const _defaultZoom = 13.0;
@@ -35,7 +40,20 @@ class _MapSearchScreenState extends State<MapSearchScreen> {
   void initState() {
     super.initState();
     _filteredProps = PropertyListing.sampleProperties;
-    _initLocation();
+    _initTileCache();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _initLocation());
+  }
+
+  Future<void> _initTileCache() async {
+    final dir = await getApplicationDocumentsDirectory();
+    final store = DbCacheStore(databasePath: '${dir.path}/map_tiles.sqlite');
+    setState(() {
+      _tileProvider = CachedTileProvider(
+        maxAge: const Duration(days: 30),
+        maxStale: const Duration(days: 60),
+        cacheStore: store,
+      );
+    });
   }
 
   @override
@@ -48,26 +66,33 @@ class _MapSearchScreenState extends State<MapSearchScreen> {
   Future<void> _initLocation() async {
     try {
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-      if (!serviceEnabled) return;
+      if (!serviceEnabled) {
+        if (mounted) showToast(context, 'Location services are disabled.');
+        return;
+      }
 
       LocationPermission permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
       }
-      if (permission == LocationPermission.denied ||
-          permission == LocationPermission.deniedForever) return;
-
-      final pos = await Geolocator.getCurrentPosition(
-        locationSettings: const LocationSettings(
-          accuracy: LocationAccuracy.low,
-          timeLimit: Duration(seconds: 5),
-        ),
-      );
-      if (mounted) {
-        _mapCtrl.move(LatLng(pos.latitude, pos.longitude), 14);
+      
+      if (permission == LocationPermission.deniedForever) {
+        if (mounted) showToast(context, 'Location permissions are permanently denied.');
+        return;
       }
-    } catch (_) {
-      // Location unavailable — fall back to default center
+
+      if (permission == LocationPermission.whileInUse || permission == LocationPermission.always) {
+        final pos = await Geolocator.getCurrentPosition(
+          locationSettings: const LocationSettings(
+            accuracy: LocationAccuracy.high,
+            timeLimit: Duration(seconds: 10),
+          ),
+        );
+        if (mounted) {
+          _mapCtrl.move(LatLng(pos.latitude, pos.longitude), 14);
+        }
+      }
+    } catch (e) {
       if (mounted) {
         showToast(context, 'Could not get current location. Using default.');
       }
@@ -75,30 +100,15 @@ class _MapSearchScreenState extends State<MapSearchScreen> {
   }
 
   Future<void> _goToMyLocation() async {
-    try {
-      final pos = await Geolocator.getCurrentPosition(
-        locationSettings: const LocationSettings(
-          accuracy: LocationAccuracy.low,
-          timeLimit: Duration(seconds: 8),
-        ),
-      );
-      if (mounted) {
-        _mapCtrl.move(LatLng(pos.latitude, pos.longitude), 15);
-        showToast(context, '📍 Centered on your location');
-      }
-    } catch (_) {
-      // Location unavailable — show error toast
-      if(mounted) {
-        showToast(context, 'Could not get your location');
-      }
-    }
+    await _initLocation();
+    if (mounted) showToast(context, '📍 Centered on your location');
   }
 
   void _selectProperty(PropertyListing p) {
     setState(() {
       _selectedProperty = p;
+      _isListView = false; // Switch to map if selected from suggestions
     });
-    // Animate map to the selected property
     _mapCtrl.move(LatLng(p.lat, p.lng), 15);
   }
 
@@ -156,34 +166,116 @@ class _MapSearchScreenState extends State<MapSearchScreen> {
   }
 
   void _onSearchChanged(String value) {
+    setState(() {}); // Trigger rebuild for suggestions
     _applyFiltersAndSearch();
   }
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final activeFilterCount = _filters.activeCount;
 
     return Scaffold(
       backgroundColor: cs.surface,
-      resizeToAvoidBottomInset: false, // Keep nav bar in place when keyboard opens
+      resizeToAvoidBottomInset: false,
       body: SafeArea(
-        child: Column(
+        child: Stack(
           children: [
+            Column(
+              children: [
+                Expanded(
+                  child: _isListView ? _buildListView(context) : _buildMapView(context),
+                ),
+                AppBottomNav(
+                  currentIndex: 1,
+                  onTap: (i) {
+                    if (i == 0) Navigator.pushReplacementNamed(context, '/home');
+                    if (i == 2) Navigator.pushReplacementNamed(context, '/saved');
+                    if (i == 3) Navigator.pushReplacementNamed(context, '/profile');
+                  },
+                ),
+              ],
+            ),
+            // Floating Header (Search Bar + Toggle)
+            Positioned(
+              top: 16,
+              left: 16,
+              right: 16,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _buildSearchBar(context),
+                  const SizedBox(height: 12),
+                  _buildViewToggle(context),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildViewToggle(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: cs.surface.withOpacity(0.9),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: cs.outlineVariant),
+        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4)],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _toggleBtn('Map', Icons.map, !_isListView),
+          _toggleBtn('List', Icons.list, _isListView),
+        ],
+      ),
+    );
+  }
+
+  Widget _toggleBtn(String label, IconData icon, bool active) {
+    final cs = Theme.of(context).colorScheme;
+    return GestureDetector(
+      onTap: () => setState(() => _isListView = label == 'List'),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: active ? cs.primary : Colors.transparent,
+          borderRadius: BorderRadius.circular(999),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, size: 16, color: active ? cs.onPrimary : cs.onSurfaceVariant),
+            const SizedBox(width: 8),
+            Text(label, style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: active ? cs.onPrimary : cs.onSurfaceVariant,
+            )),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildSearchBar(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final suggestions = _filteredProps.take(5).toList(); // Show top 5 suggestions
+    final suggestions = _filteredProps.take(5).toList();
     final activeFilterCount = _filters.activeCount;
     final showSuggestions = _searchCtrl.text.isNotEmpty && suggestions.isNotEmpty;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
       children: [
         Container(
           decoration: BoxDecoration(
             color: cs.surface,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(color: cs.outlineVariant),
+            boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0, 2))],
           ),
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
           child: Row(
@@ -194,70 +286,17 @@ class _MapSearchScreenState extends State<MapSearchScreen> {
                 child: TextField(
                   controller: _searchCtrl,
                   decoration: InputDecoration.collapsed(
-                    hintText: 'Search by address, neighborhood, price...',
+                    hintText: 'Search neighborhoods...',
                     hintStyle: AppTextStyle.bodyMd.copyWith(color: cs.onSurfaceVariant),
                   ),
-                  textInputAction: TextInputAction.search,
                   onChanged: _onSearchChanged,
                 ),
               ),
-              // Filter button with badge
-              Stack(
-                children: [
-                  GestureDetector(
-                    onTap: () {
-                      showModalBottomSheet<FilterOptions>(
-                        context: context,
-                        isScrollControlled: true,
-                        backgroundColor: Colors.transparent,
-                        builder: (_) => FilterBottomSheet(
-                          current: _filters,
-                          onApply: (f) => _applyFilters(f),
-                        ),
-                      );
-                    },
-                    child: Container(
-                      width: 36, height: 36,
-                      decoration: BoxDecoration(
-                        color: activeFilterCount > 0 ? cs.primary : cs.surface,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(
-                          color: activeFilterCount > 0 ? cs.primary : cs.outlineVariant,
-                        ),
-                      ),
-                      child: Icon(
-                        Icons.tune,
-                        size: 18,
-                        color: activeFilterCount > 0 ? cs.onPrimary : cs.onSurfaceVariant,
-                      ),
-                    ),
-                  ),
-                  if (activeFilterCount > 0)
-                    Positioned(
-                      top: -2, right: -2,
-                      child: Container(
-                        width: 18, height: 18,
-                        decoration: BoxDecoration(
-                          color: cs.error,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Text(
-                          '$activeFilterCount',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: cs.onError,
-                            fontSize: 10,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
-              ),
+              const SizedBox(width: 8),
+              _buildFilterButton(context),
             ],
           ),
         ),
-        // Suggestions dropdown
         if (showSuggestions)
           Container(
             margin: const EdgeInsets.only(top: 8),
@@ -265,52 +304,52 @@ class _MapSearchScreenState extends State<MapSearchScreen> {
               color: cs.surface,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: cs.outlineVariant),
+              boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 8)],
             ),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                ...suggestions.map((p) {
-                  final isSelected = _selectedProperty?.id == p.id;
-                  return ListTile(
-                    onTap: () {
-                      _selectProperty(p);
-                      _searchCtrl.clear();
-                    },
-                    dense: true,
-                    leading: ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: SizedBox(
-                        width: 40, height: 40,
-                        child: CachedNetworkImage(
-                          imageUrl: p.imageUrl,
-                          fit: BoxFit.cover,
-                          memCacheWidth: 80,
-                          memCacheHeight: 80,
-                          placeholder: (_, __) => Container(
-                            color: AppTheme.surfaceContainerOf(context),
-                          ),
-                          errorBuilder: (_, __, ___) => Icon(Icons.home, color: cs.onSurfaceVariant, size: 20),
-                        ),
-                      ),
-                    ),
-                    title: Text(
-                      p.address,
-                      style: AppTextStyle.bodyMd.copyWith(color: cs.onSurface),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    subtitle: Text(
-                      p.price,
-                      style: AppTextStyle.bodyMd.copyWith(color: cs.onSurfaceVariant),
-                    ),
-                    trailing: Icon(
-                      isSelected ? Icons.check_circle : Icons.add_circle,
-                      color: cs.primary,
-                      size: 20,
-                    ),
-                  );
-                }).toList(),
+              children: suggestions.map((p) => ListTile(
+                leading: const Icon(Icons.location_on_outlined, size: 20),
+                title: Text(p.address, style: AppTextStyle.bodyMd, maxLines: 1, overflow: TextOverflow.ellipsis),
+                subtitle: Text(p.price, style: const TextStyle(fontSize: 12)),
+                onTap: () {
+                  _selectProperty(p);
+                  _searchCtrl.clear();
+                  FocusScope.of(context).unfocus();
+                },
+              )).toList(),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildFilterButton(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final activeFilterCount = _filters.activeCount;
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        IconButton(
+          onPressed: () {
+            showModalBottomSheet(
+              context: context,
+              isScrollControlled: true,
+              backgroundColor: Colors.transparent,
+              builder: (_) => FilterBottomSheet(
+                current: _filters,
+                onApply: _applyFilters,
               ),
+            );
+          },
+          icon: Icon(Icons.tune, color: activeFilterCount > 0 ? cs.primary : cs.onSurfaceVariant),
+        ),
+        if (activeFilterCount > 0)
+          Positioned(
+            right: 8, top: 8,
+            child: CircleAvatar(
+              radius: 8,
+              backgroundColor: cs.error,
+              child: Text('$activeFilterCount', style: const TextStyle(fontSize: 10, color: Colors.white)),
             ),
           ),
       ],
@@ -319,504 +358,163 @@ class _MapSearchScreenState extends State<MapSearchScreen> {
 
   Widget _buildMapView(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    if (_filteredProps.isEmpty) {
-      return _EmptyState(onClear: () {
-        _filters = const FilterOptions();
-        _searchCtrl.clear();
-        _applyFiltersAndSearch();
-      });
-    }
+    if (_filteredProps.isEmpty) return _EmptyState(onClear: () {
+      _searchCtrl.clear();
+      _filters = const FilterOptions();
+      _applyFiltersAndSearch();
+    });
 
     return Stack(
       children: [
-        // Map (wrapped in RepaintBoundary to isolate expensive tile repaints)
-        Positioned.fill(
-          child: RepaintBoundary(
-            child: FlutterMap(
-            mapController: _mapCtrl,
+        FlutterMap(
+          mapController: _mapCtrl,
           options: MapOptions(
             initialCenter: _defaultCenter,
             initialZoom: _defaultZoom,
-            minZoom: _minZoom,
-            maxZoom: _maxZoom,
-            interactionOptions: const InteractionOptions(
-              flags: InteractiveFlag.drag | InteractiveFlag.pinchZoom | InteractiveFlag.doubleTapZoom,
-            ),
             onTap: (_, __) {
-              FocusScope.of(context).unfocus();
               _clearSelection();
+              FocusScope.of(context).unfocus();
             },
           ),
           children: [
             TileLayer(
               urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
               userAgentPackageName: 'com.tenantmatch.app',
+              tileProvider: _tileProvider,
             ),
-            // Property markers
             MarkerLayer(
-              markers: _filteredProps.map((p) {
-                final isSelected = _selectedProperty?.id == p.id;
-                final isHot = p.isHot || p.isGreatValue;
-                return Marker(
-                  point: LatLng(p.lat, p.lng),
-                  width: isSelected ? 100 : 80,
-                  height: isSelected ? 100 : 80,
-                  child: GestureDetector(
-                    onTap: () => _selectProperty(p),
-                    child: AnimatedScale(
-                      scale: isSelected ? 1.25 : 1.0,
-                      duration: const Duration(milliseconds: 200),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: isSelected ? cs.secondary : cs.primary,
-                                borderRadius: BorderRadius.circular(8),
-                                boxShadow: isSelected
-                                    ? _selectedShadow
-                                    : _defaultShadow,
-                              ),
-                            child: Text(
-                              p.title,
-                              style: TextStyle(
-                                color: isSelected ? cs.onSecondary : cs.onPrimary,
-                                fontSize: 11,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Icon(
-                            isHot ? Icons.local_fire_department : Icons.location_on,
-                            color: isSelected ? cs.secondary : (isHot ? Colors.orange : cs.error),
-                            size: isSelected ? 32 : (isHot ? 28 : 24),
-                          ),
-                        ],
-                      ),
-                    ),
+              markers: _filteredProps.map((p) => Marker(
+                point: LatLng(p.lat, p.lng),
+                width: 60, height: 60,
+                child: GestureDetector(
+                  onTap: () => _selectProperty(p),
+                  child: Icon(
+                    Icons.location_on,
+                    color: _selectedProperty?.id == p.id ? cs.secondary : cs.primary,
+                    size: _selectedProperty?.id == p.id ? 40 : 30,
                   ),
-                );
-              }).toList(),
+                ),
+              )).toList(),
             ),
           ],
-          ),
-            ),
         ),
-        // Summary card when a property is selected (like Google Maps info window)
+        // Zoom Controls
+        Positioned(
+          right: 16,
+          bottom: 220,
+          child: _ZoomControls(
+            onZoomIn: () => _mapCtrl.move(_mapCtrl.camera.center, _mapCtrl.camera.zoom + 1),
+            onZoomOut: () => _mapCtrl.move(_mapCtrl.camera.center, _mapCtrl.camera.zoom - 1),
+            onMyLocation: _goToMyLocation,
+          ),
+        ),
+        // Property Summary Card
         if (_selectedProperty != null)
           Positioned(
-            left: AppTheme.containerMargin,
-            right: AppTheme.containerMargin,
-            bottom: 200, // Increased from 170 to avoid overlap with zoom controls
+            left: 16, right: 16, bottom: 120,
             child: _PropertySummaryCard(
               property: _selectedProperty!,
               onTap: () => Navigator.pushNamed(context, '/listing-details', arguments: _selectedProperty!.id),
               onClose: _clearSelection,
             ),
           ),
-        // Zoom controls
-        Positioned(
-          right: AppTheme.containerMargin,
-          bottom: 180,
-          child: RepaintBoundary(
-            child: _ZoomControls(
-              onZoomIn: () => _mapCtrl.move(
-                _mapCtrl.camera.center,
-                (_mapCtrl.camera.zoom + 1).clamp(_minZoom, _maxZoom),
-              ),
-              onZoomOut: () => _mapCtrl.move(
-                _mapCtrl.camera.center,
-                (_mapCtrl.camera.zoom - 1).clamp(_minZoom, _maxZoom),
-              ),
-              onMyLocation: _goToMyLocation,
-            ),
-          ),
-        ),
-        // Bottom sheet with property list overlay
-        Positioned(
-          left: 0, right: 0, bottom: 0,
-          child: RepaintBoundary(
-            child: _PropertyListSheet(
-              selectedProperty: _selectedProperty,
-              filteredProps: _filteredProps,
-              onSelect: _selectProperty,
-              onFavoriteTap: (p) async {
-                await favoritesService.toggle(p.id);
-                setState(() {});
-              },
-            ),
-          ),
-        ),
       ],
     );
   }
 
   Widget _buildListView(BuildContext context) {
-    if (_filteredProps.isEmpty) {
-      return _EmptyState(onClear: () {
-        _filters = const FilterOptions();
-        _searchCtrl.clear();
-        _applyFiltersAndSearch();
-      });
-    }
-
     return ListView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: AppTheme.containerMargin),
-      physics: const BouncingScrollPhysics(),
+      padding: const EdgeInsets.fromLTRB(16, 140, 16, 16),
       itemCount: _filteredProps.length,
-      itemBuilder: (_, i) {
-        final p = _filteredProps[i];
+      itemBuilder: (context, index) {
+        final p = _filteredProps[index];
         return Padding(
-          padding: const EdgeInsets.only(bottom: AppTheme.gutter),
+          padding: const EdgeInsets.only(bottom: 16),
           child: PropertyCard(
             property: p,
             isFavorite: favoritesService.isFavorite(p.id),
             onTap: () => Navigator.pushNamed(context, '/listing-details', arguments: p.id),
-            onFavoriteTap: () async {
-              await favoritesService.toggle(p.id);
-              setState(() {});
-            },
+            onFavoriteTap: () => setState(() => favoritesService.toggle(p.id)),
             showTenantScore: true,
           ),
         );
       },
     );
   }
-
 }
 
-/// Extracted zoom controls with RepaintBoundary isolation.
 class _ZoomControls extends StatelessWidget {
-  final VoidCallback onZoomIn;
-  final VoidCallback onZoomOut;
-  final VoidCallback onMyLocation;
-
-  const _ZoomControls({
-    required this.onZoomIn,
-    required this.onZoomOut,
-    required this.onMyLocation,
-  });
+  final VoidCallback onZoomIn, onZoomOut, onMyLocation;
+  const _ZoomControls({required this.onZoomIn, required this.onZoomOut, required this.onMyLocation});
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Container(
-      decoration: BoxDecoration(
-        color: cs.surface,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: cs.outlineVariant),
-        boxShadow: const [
-          BoxShadow(color: _shadowLight, blurRadius: 8),
-        ],
-      ),
-      child: Column(
-        children: [
-          _ZoomBtn(icon: Icons.add, onTap: onZoomIn),
-          Divider(height: 1, color: cs.outlineVariant),
-          _ZoomBtn(icon: Icons.remove, onTap: onZoomOut),
-          Divider(height: 1, color: cs.outlineVariant),
-          _ZoomBtn(icon: Icons.my_location, onTap: onMyLocation),
-        ],
-      ),
+    return Column(
+      children: [
+        FloatingActionButton.small(heroTag: 'zoom_in', onPressed: onZoomIn, child: const Icon(Icons.add)),
+        const SizedBox(height: 8),
+        FloatingActionButton.small(heroTag: 'zoom_out', onPressed: onZoomOut, child: const Icon(Icons.remove)),
+        const SizedBox(height: 8),
+        FloatingActionButton.small(heroTag: 'my_loc', onPressed: onMyLocation, child: const Icon(Icons.my_location)),
+      ],
     );
   }
 }
 
-/// Individual zoom button extracted to avoid rebuilds.
-class _ZoomBtn extends StatelessWidget {
-  final IconData icon;
-  final VoidCallback onTap;
-  const _ZoomBtn({required this.icon, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 40, height: 40,
-        alignment: Alignment.center,
-        child: Icon(icon, size: 20, color: cs.primary),
-      ),
-    );
-  }
-}
-
-/// Extracted bottom property list sheet for rebuild isolation.
-class _PropertyListSheet extends StatelessWidget {
-  final PropertyListing? selectedProperty;
-  final List<PropertyListing> filteredProps;
-  final ValueChanged<PropertyListing> onSelect;
-  final ValueChanged<PropertyListing> onFavoriteTap;
-
-  const _PropertyListSheet({
-    required this.selectedProperty,
-    required this.filteredProps,
-    required this.onSelect,
-    required this.onFavoriteTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Container(
-      constraints: const BoxConstraints(maxHeight: 160),
-      decoration: BoxDecoration(
-        color: cs.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-        boxShadow: const [
-          BoxShadow(
-            color: _shadowSheet,
-            blurRadius: 12,
-            offset: Offset(0, -2),
-          ),
-        ],
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Handle bar
-          Center(
-            child: Container(
-              margin: const EdgeInsets.only(top: 8, bottom: 4),
-              width: 32, height: 4,
-              decoration: BoxDecoration(
-                color: cs.onSurfaceVariant,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(left: AppTheme.containerMargin, bottom: 4),
-            child: Text(
-              selectedProperty != null ? 'Selected property' : 'Tap a pin or scroll listings',
-              style: AppTextStyle.labelCaps.copyWith(color: cs.onSurfaceVariant),
-            ),
-          ),
-          SizedBox(
-            height: 120,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: AppTheme.containerMargin),
-              itemCount: filteredProps.length,
-              separatorBuilder: (_, __) => const SizedBox(width: AppTheme.gutter),
-              itemBuilder: (_, i) {
-                final p = filteredProps[i];
-                final isSel = selectedProperty?.id == p.id;
-                return SizedBox(
-                  width: 220,
-                  child: PropertyCard(
-                    property: p,
-                    isFavorite: favoritesService.isFavorite(p.id),
-                    compact: true,
-                    onTap: () => onSelect(p),
-                    onFavoriteTap: () => onFavoriteTap(p),
-                  ),
-                );
-              },
-            ),
-          ),
-          const SizedBox(height: 4),
-        ],
-      ),
-    );
-  }
-}
-
-/// Reusable empty state with optional "Clear Filters" action.
-class _EmptyState extends StatelessWidget {
-  final VoidCallback? onClear;
-  const _EmptyState({this.onClear});
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.search_off, size: 64, color: cs.onSurfaceVariant),
-          const SizedBox(height: 8),
-          Text('No properties match your filters',
-              style: AppTextStyle.bodyMd.copyWith(color: cs.onSurfaceVariant)),
-          if (onClear != null) ...[
-            const SizedBox(height: 16),
-            GestureDetector(
-              onTap: onClear,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                decoration: BoxDecoration(
-                  color: cs.primary,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text('Clear Filters',
-                    style: AppTextStyle.bodyMd.copyWith(color: cs.onPrimary, fontWeight: FontWeight.w600)),
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-}
-
-/// Top-level shadow colors to avoid `withOpacity` allocations on every build.
-const Color _shadowLight = Color(0x1A000000); // Colors.black.withOpacity(0.1)
-const Color _shadowSheet = Color(0x14000000); // Colors.black.withOpacity(0.08)
-const List<BoxShadow> _selectedShadow = [
-  BoxShadow(color: Color(0x59000000), blurRadius: 8), // Colors.black.withOpacity(0.35)
-];
-const List<BoxShadow> _defaultShadow = [
-  BoxShadow(color: Color(0x33000000), blurRadius: 4), // Colors.black.withOpacity(0.2)
-];
-
-/// Google Maps-style summary card shown above the bottom sheet when a pin is tapped.
 class _PropertySummaryCard extends StatelessWidget {
   final PropertyListing property;
-  final VoidCallback onTap;
-  final VoidCallback onClose;
-
-  const _PropertySummaryCard({
-    required this.property,
-    required this.onTap,
-    required this.onClose,
-  });
+  final VoidCallback onTap, onClose;
+  const _PropertySummaryCard({required this.property, required this.onTap, required this.onClose});
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    return Material(
-      elevation: 8,
-      borderRadius: BorderRadius.circular(14),
-      shadowColor: const Color(0x33000000), // Colors.black.withOpacity(0.2)
-      child: Container(
-        decoration: BoxDecoration(
-          color: cs.surface,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: cs.outlineVariant, width: 0.5),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Content
-            Padding(
-              padding: const EdgeInsets.fromLTRB(14, 12, 14, 8),
-              child: Row(
-                children: [
-                  // Thumbnail image
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: SizedBox(
-                      width: 64,
-                      height: 64,
-                      child: CachedNetworkImage(
-                        imageUrl: property.imageUrl,
-                        fit: BoxFit.cover,
-                        memCacheWidth: 128,
-                        memCacheHeight: 128,
-                        placeholder: (_, __) => Container(
-                          color: AppTheme.surfaceContainerOf(context),
-                        ),
-                        errorWidget: (_, __, ___) => Container(
-                          color: AppTheme.surfaceContainerOf(context),
-                          child: Icon(Icons.home, color: cs.onSurfaceVariant, size: 28),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  // Details
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          property.price,
-                          style: AppTextStyle.headlineMd.copyWith(color: cs.primary),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          property.address,
-                          style: AppTextStyle.bodyMd.copyWith(color: cs.onSurfaceVariant),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 4),
-                        Row(
-                          children: [
-                            _miniChip('${property.beds} bed', context),
-                            const SizedBox(width: 6),
-                            _miniChip('${property.baths} bath', context),
-                            if (property.tenantScore > 0) ...[
-                              const SizedBox(width: 6),
-                              _miniChip('${property.tenantScore}', context,
-                                  icon: Icons.analytics_outlined),
-                            ],
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  // View button
-                  GestureDetector(
-                    onTap: onTap,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: cs.primary,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text('View', style: AppTextStyle.bodyMd.copyWith(
-                        color: cs.onPrimary, fontWeight: FontWeight.w600,
-                      )),
-                    ),
-                  ),
-                ],
-              ),
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: cs.surface,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 10)],
+      ),
+      child: Row(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: CachedNetworkImage(imageUrl: property.imageUrl, width: 70, height: 70, fit: BoxFit.cover),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(property.price, style: AppTextStyle.headlineSm),
+                Text(property.address, style: AppTextStyle.bodyMd, maxLines: 1, overflow: TextOverflow.ellipsis),
+              ],
             ),
-            // Close bar
-            GestureDetector(
-              onTap: onClose,
-              behavior: HitTestBehavior.opaque,
-              child: Container(
-                padding: const EdgeInsets.only(bottom: 8),
-                alignment: Alignment.center,
-                child: Container(
-                  width: 28, height: 3,
-                  decoration: BoxDecoration(
-                    color: cs.onSurfaceVariant,
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
+          ),
+          IconButton(onPressed: onTap, icon: Icon(Icons.arrow_forward_ios, size: 18, color: cs.primary)),
+          IconButton(onPressed: onClose, icon: const Icon(Icons.close, size: 18)),
+        ],
       ),
     );
   }
+}
 
-  Widget _miniChip(String label, BuildContext context, {IconData? icon}) {
-    final cs = Theme.of(context).colorScheme;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-      decoration: BoxDecoration(
-        color: AppTheme.surfaceContainerLowOf(context),
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
+class _EmptyState extends StatelessWidget {
+  final VoidCallback onClear;
+  const _EmptyState({required this.onClear});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          if (icon != null) ...[
-            Icon(icon, size: 11, color: cs.primary),
-            const SizedBox(width: 2),
-          ],
-          Text(label, style: TextStyle(fontSize: 10, color: cs.onSurfaceVariant)),
+          const Icon(Icons.search_off, size: 64, color: Colors.grey),
+          const SizedBox(height: 16),
+          const Text('No properties found'),
+          TextButton(onPressed: onClear, child: const Text('Clear Filters')),
         ],
       ),
     );

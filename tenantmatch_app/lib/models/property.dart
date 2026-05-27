@@ -14,6 +14,7 @@ class PropertyListing {
   final bool petsOk;
   final bool isHot;
   final bool isGreatValue;
+  final bool hasVirtualTour;
   final String insight;
   final double lat;
   final double lng;
@@ -36,10 +37,19 @@ class PropertyListing {
     this.petsOk = false,
     this.isHot = false,
     this.isGreatValue = false,
+    this.hasVirtualTour = false,
     this.insight = '',
     this.type = 'Apartment',
     this.neighborhood = '',
   });
+
+  List<String> get images => [
+    imageUrl,
+    'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&q=80&w=800',
+    'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&q=80&w=800',
+    'https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&q=80&w=800',
+    'https://images.unsplash.com/photo-1493809842364-78817add7ffb?auto=format&fit=crop&q=80&w=800',
+  ];
 
   Color get chipColor {
     if (isHot) return Colors.orange;
@@ -69,6 +79,7 @@ class PropertyListing {
       tenantScore: 94,
       petsOk: true,
       isHot: true,
+      hasVirtualTour: true,
       insight: 'Priced 4% below similar units in this building. 12 min transit to your office.',
       type: 'Apartment',
       neighborhood: 'Downtown',
@@ -143,6 +154,7 @@ class PropertyListing {
       tenantScore: 96,
       petsOk: true,
       isHot: true,
+      hasVirtualTour: true,
       insight: 'Premium waterfront living. Top-rated schools within 1 mile.',
       type: 'Condo',
       neighborhood: 'Embarcadero',
@@ -204,6 +216,79 @@ class PropertyListing {
       type: 'Apartment',
       neighborhood: 'Castro',
     ),
+    PropertyListing(
+      id: 'prop_9',
+      title: '\$3,500',
+      price: '\$3,500/mo',
+      address: '888 Brannan St, #501',
+      beds: 2,
+      baths: 2,
+      sqft: 1200,
+      imageUrl: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&q=80&w=800',
+      lat: 37.7712,
+      lng: -122.4035,
+      transitScore: 95,
+      tenantScore: 91,
+      petsOk: true,
+      isHot: true,
+      hasVirtualTour: true,
+      type: 'Loft',
+      neighborhood: 'SoMa',
+    ),
+    PropertyListing(
+      id: 'prop_10',
+      title: '\$2,450',
+      price: '\$2,450/mo',
+      address: '420 Taylor St, Apt 2',
+      beds: 1,
+      baths: 1,
+      sqft: 750,
+      imageUrl: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&q=80&w=800',
+      lat: 37.7865,
+      lng: -122.4112,
+      transitScore: 82,
+      tenantScore: 79,
+      petsOk: false,
+      isHot: false,
+      type: 'Apartment',
+      neighborhood: 'Tenderloin',
+    ),
+    PropertyListing(
+      id: 'prop_11',
+      title: '\$4,800',
+      price: '\$4,800/mo',
+      address: '1500 Haight St',
+      beds: 3,
+      baths: 2,
+      sqft: 1600,
+      imageUrl: 'https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&q=80&w=800',
+      lat: 37.7695,
+      lng: -122.4485,
+      transitScore: 75,
+      tenantScore: 88,
+      petsOk: true,
+      isHot: false,
+      type: 'Flat',
+      neighborhood: 'Haight-Ashbury',
+    ),
+    PropertyListing(
+      id: 'prop_12',
+      title: '\$3,100',
+      price: '\$3,100/mo',
+      address: '1201 Greenwich St',
+      beds: 2,
+      baths: 1,
+      sqft: 1050,
+      imageUrl: 'https://images.unsplash.com/photo-1493809842364-78817add7ffb?auto=format&fit=crop&q=80&w=800',
+      lat: 37.8015,
+      lng: -122.4195,
+      transitScore: 89,
+      tenantScore: 93,
+      petsOk: false,
+      isGreatValue: true,
+      type: 'Apartment',
+      neighborhood: 'Russian Hill',
+    ),
   ];
 
   static PropertyListing fromId(String id) {
@@ -213,7 +298,7 @@ class PropertyListing {
     );
   }
 
-  static List<String> get types => ['All', 'Apartment', 'Condo', 'House', 'Studio'];
+  static List<String> get types => ['All', 'Apartment', 'Condo', 'House', 'Studio', 'Loft', 'Flat'];
   static List<String> get neighborhoods =>
       sampleProperties.map((p) => p.neighborhood).toSet().toList()..sort();
 }

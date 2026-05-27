@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../theme/app_theme.dart';
 import '../widgets/property_card.dart';
 import '../widgets/bottom_nav.dart';
@@ -65,6 +66,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   _buildSearchBar(context),
                   SizedBox(height: AppTheme.spacingLg),
                   _buildQuickActions(context),
+                  SizedBox(height: AppTheme.spacingLg),
+                  _buildVirtualTours(context, props),
                   SizedBox(height: AppTheme.spacingLg),
                   _buildTopMatches(context, props),
                   SizedBox(height: AppTheme.spacingLg),
@@ -146,7 +149,7 @@ class _HomeScreenState extends State<HomeScreen> {
         Text('Quick Actions', style: AppTextStyle.headlineMd.copyWith(color: cs.primary)),
         SizedBox(height: AppTheme.spacingMd),
         SizedBox(
-          height: 120,
+          height: 140,
           child: ListView(
             scrollDirection: Axis.horizontal,
             physics: const BouncingScrollPhysics(),
@@ -155,7 +158,7 @@ class _HomeScreenState extends State<HomeScreen> {
               SizedBox(width: AppTheme.gutter),
               _actionCard(Icons.bookmark, 'Saved Searches', '2 new listings', context, () => Navigator.pushNamed(context, '/saved')),
               SizedBox(width: AppTheme.gutter),
-              _actionCard(Icons.view_in_ar, 'Virtual Tours', 'Explore remotely', context, () => Navigator.pushNamed(context, '/virtual-tour')),
+              _actionCard(Icons.view_in_ar, 'Virtual Tours', 'Explore remotely', context, () => Navigator.pushNamed(context, '/virtual-tour', arguments: 'prop_1')),
             ],
           ),
         ),
@@ -190,12 +193,124 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Icon(icon, color: cs.primary),
             ),
             Spacer(),
-            Text(title, style: AppTextStyle.headlineSm.copyWith(color: cs.onSurface)),
+            Text(title, 
+              style: AppTextStyle.headlineSm.copyWith(color: cs.onSurface),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
             SizedBox(height: 4),
-            Text(subtitle, style: AppTextStyle.bodyMd.copyWith(color: cs.onSurfaceVariant)),
+            Text(subtitle, 
+              style: AppTextStyle.bodyMd.copyWith(color: cs.onSurfaceVariant),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildVirtualTours(BuildContext context, List<PropertyListing> props) {
+    final cs = Theme.of(context).colorScheme;
+    final tourProps = props.where((p) => p.hasVirtualTour).toList();
+    if (tourProps.isEmpty) return const SizedBox.shrink();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(Icons.view_in_ar, size: 20, color: cs.secondary),
+            SizedBox(width: 8),
+            Text('Virtual Tours', style: AppTextStyle.headlineMd.copyWith(color: cs.primary)),
+          ],
+        ),
+        SizedBox(height: AppTheme.spacingSm),
+        Text('360° walkthroughs available', style: AppTextStyle.bodyMd.copyWith(color: cs.onSurfaceVariant)),
+        SizedBox(height: AppTheme.spacingMd),
+        SizedBox(
+          height: 180,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            physics: const BouncingScrollPhysics(),
+            itemCount: tourProps.length,
+            itemBuilder: (context, index) {
+              final p = tourProps[index];
+              return GestureDetector(
+                onTap: () => Navigator.pushNamed(context, '/virtual-tour', arguments: p.id),
+                child: Container(
+                  width: 160,
+                  margin: EdgeInsets.only(right: AppTheme.gutter),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: cs.outlineVariant),
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Stack(
+                          children: [
+                            CachedNetworkImage(
+                              imageUrl: p.imageUrl,
+                              fit: BoxFit.cover,
+                              width: double.infinity,
+                              height: double.infinity,
+                              memCacheWidth: 320,
+                              memCacheHeight: 240,
+                              placeholder: (_, __) => Container(color: AppTheme.surfaceContainerOf(context)),
+                              errorWidget: (_, __, ___) => Icon(Icons.home_outlined, color: cs.onSurfaceVariant),
+                            ),
+                            Container(
+                              alignment: Alignment.center,
+                              decoration: const BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                  colors: [Colors.transparent, Colors.black45],
+                                ),
+                              ),
+                              child: const Icon(Icons.view_in_ar, color: Colors.white, size: 32),
+                            ),
+                            Positioned(
+                              top: 8, right: 8,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                                decoration: BoxDecoration(
+                                  color: Colors.black54,
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: const Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(Icons._3d_rotation, size: 12, color: Colors.cyanAccent),
+                                    SizedBox(width: 4),
+                                    Text('360°', style: TextStyle(color: Colors.cyanAccent, fontSize: 10, fontWeight: FontWeight.bold)),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(p.price, style: AppTextStyle.headlineSm.copyWith(color: cs.primary)),
+                            Text(p.address, style: AppTextStyle.bodyMd.copyWith(fontSize: 11), maxLines: 1, overflow: TextOverflow.ellipsis),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 

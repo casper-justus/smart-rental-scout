@@ -65,8 +65,9 @@ class TenantMatchApp extends StatelessWidget {
                 screen = const ComparePropertiesScreen();
                 break;
               case '/virtual-tour':
-                screen = const VirtualTourScreen();
-                return AppRouteTransitions.scaleIn(screen, settings);
+                final propId = settings.arguments as String? ?? '';
+                screen = VirtualTourScreen(propertyId: propId);
+                return AppRouteTransitions.fadeIn(screen, settings);
               case '/app-step1':
                 screen = const ApplicationPortalStep1Screen();
                 break;

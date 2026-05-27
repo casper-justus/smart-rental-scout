@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../theme/app_theme.dart';
-
 import '../widgets/app_top_bar.dart';
 import '../widgets/toast.dart';
 import '../models/property.dart';
@@ -44,142 +43,8 @@ class _ListingDetailsScreenState extends State<ListingDetailsScreen> {
               child: ListView(
                 physics: const BouncingScrollPhysics(),
                 children: [
-                  // Hero image
-                  Hero(
-                    tag: 'property_img_${p.id}',
-                    child: Stack(
-                      children: [
-                        Container(
-                          height: 250,
-                          width: double.infinity,
-                          color: AppTheme.surfaceContainerOf(context),
-                          child: CachedNetworkImage(
-                              imageUrl: p.imageUrl,
-                              fit: BoxFit.cover,
-                              memCacheWidth: 600,
-                              memCacheHeight: 375,
-                              placeholder: (_, __) => Container(
-                                color: AppTheme.surfaceContainerOf(context),
-                              ),
-                              errorWidget: (_, __, ___) => Icon(Icons.home,
-                                  size: 64, color: cs.onSurfaceVariant)),
-                        ),
-                        // Gradient overlay with address
-                        Positioned(
-                          left: 0, right: 0, bottom: 0,
-                          child: Container(
-                            height: 64,
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.topCenter,
-                                end: Alignment.bottomCenter,
-                                colors: [Colors.transparent, Colors.black.withOpacity(0.65)],
-                              ),
-                            ),
-                            padding: const EdgeInsets.only(left: 12, right: 12, bottom: 10),
-                            alignment: Alignment.bottomLeft,
-                            child: Text(
-                              p.title,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
-                                fontWeight: FontWeight.w700,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ),
-                        if (p.isHot || p.isGreatValue)
-                          Positioned(
-                            top: 12,
-                            left: 12,
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 8, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: cs.surface,
-                                borderRadius: BorderRadius.circular(999),
-                              ),
-                              child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      p.isHot ? Icons.local_fire_department : Icons.star,
-                                      size: 14,
-                                      color: p.chipColor,
-                                    ),
-                                    const SizedBox(width: 4),
-                                    Text(p.chipLabel, style: AppTextStyle.labelCaps.copyWith(color: p.chipColor)),
-                                  ]),
-                            ),
-                          ),
-                        Semantics(
-                          label: 'Tenant score ${p.tenantScore} out of 100',
-                          child: Positioned(
-                            bottom: 12,
-                            right: 12,
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 10, vertical: 6),
-                              decoration: BoxDecoration(
-                                color: cs.secondaryContainer,
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text('TENANT SCORE',
-                                        style: AppTextStyle.labelCaps.copyWith(
-                                            color: cs.onSecondaryContainer,
-                                            fontSize: 10)),
-                                    Text('${p.tenantScore}/100',
-                                        style: AppTextStyle.headlineSm.copyWith(
-                                            color: cs.onSecondaryContainer)),
-                                  ]),
-                            ),
-                          ),
-                        ),
-                        Semantics(
-                          label: _isFav
-                              ? 'Remove from favorites'
-                              : 'Add to favorites',
-                          button: true,
-                          child: Positioned(
-                            top: 12,
-                            right: 12,
-                            child: GestureDetector(
-                              onTap: () async {
-                                await favoritesService.toggle(p.id);
-                                _refreshFav();
-                                showToast(
-                                    context,
-                                    _isFav
-                                        ? 'Added to favorites'
-                                        : 'Removed from favorites');
-                              },
-                              child: Container(
-                                width: 40,
-                                height: 40,
-                                decoration: BoxDecoration(
-                                  color: cs.surface.withOpacity(0.8),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Icon(
-                                    _isFav
-                                        ? Icons.favorite
-                                        : Icons.favorite_border,
-                                    color: _isFav
-                                        ? cs.error
-                                        : cs.onSurfaceVariant,
-                                    size: 20),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                  // Image carousel
+                  _buildImageCarousel(context),
                   Padding(
                     padding: EdgeInsets.all(AppTheme.containerMargin),
                     child: Column(
@@ -351,8 +216,9 @@ class _ListingDetailsScreenState extends State<ListingDetailsScreen> {
                         SizedBox(height: AppTheme.spacingMd),
 
                         // Virtual Tour
+                        if (p.hasVirtualTour)
                         GestureDetector(
-                          onTap: () => Navigator.pushNamed(context, '/virtual-tour'),
+                          onTap: () => Navigator.pushNamed(context, '/virtual-tour', arguments: p.id),
                           child: Container(
                             padding: EdgeInsets.symmetric(vertical: 14),
                             decoration: BoxDecoration(
@@ -409,6 +275,203 @@ class _ListingDetailsScreenState extends State<ListingDetailsScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildImageCarousel(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final images = p.images;
+    return SizedBox(
+      height: 300,
+      child: Stack(
+        children: [
+          PageView.builder(
+            itemCount: images.length,
+            itemBuilder: (context, index) {
+              return Hero(
+                tag: index == 0 ? 'property_img_${p.id}' : 'property_img_${p.id}_$index',
+                child: Container(
+                  width: double.infinity,
+                  color: AppTheme.surfaceContainerOf(context),
+                  child: CachedNetworkImage(
+                    imageUrl: images[index],
+                    fit: BoxFit.cover,
+                    memCacheWidth: 600,
+                    memCacheHeight: 400,
+                    placeholder: (_, __) => Container(
+                      color: AppTheme.surfaceContainerOf(context),
+                    ),
+                    errorWidget: (_, __, ___) => Icon(
+                      Icons.home, size: 64, color: cs.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+          // Gradient overlay with address
+          Positioned(
+            left: 0, right: 0, bottom: 0,
+            child: Container(
+              height: 64,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [Colors.transparent, Colors.black.withOpacity(0.65)],
+                ),
+              ),
+              padding: const EdgeInsets.only(left: 12, right: 12, bottom: 10),
+              alignment: Alignment.bottomLeft,
+              child: Text(
+                p.title,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ),
+          // Hot / Great Value badge
+          if (p.isHot || p.isGreatValue)
+            Positioned(
+              top: 12,
+              left: 12,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: cs.surface,
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      p.isHot ? Icons.local_fire_department : Icons.star,
+                      size: 14,
+                      color: p.chipColor,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(p.chipLabel, style: AppTextStyle.labelCaps.copyWith(color: p.chipColor)),
+                  ],
+                ),
+              ),
+            ),
+          // Tenant score (bottom-right)
+          Semantics(
+            label: 'Tenant score ${p.tenantScore} out of 100',
+            child: Positioned(
+              bottom: 12,
+              right: 12,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: cs.secondaryContainer,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('TENANT SCORE',
+                        style: AppTextStyle.labelCaps.copyWith(
+                            color: cs.onSecondaryContainer,
+                            fontSize: 10)),
+                    Text('${p.tenantScore}/100',
+                        style: AppTextStyle.headlineSm.copyWith(
+                            color: cs.onSecondaryContainer)),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          // Favorite button
+          Semantics(
+            label: _isFav ? 'Remove from favorites' : 'Add to favorites',
+            button: true,
+            child: Positioned(
+              top: 12,
+              right: 12,
+              child: GestureDetector(
+                onTap: () async {
+                  await favoritesService.toggle(p.id);
+                  _refreshFav();
+                  showToast(context, _isFav ? 'Added to favorites' : 'Removed from favorites');
+                },
+                child: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: cs.surface.withOpacity(0.8),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    _isFav ? Icons.favorite : Icons.favorite_border,
+                    color: _isFav ? cs.error : cs.onSurfaceVariant,
+                    size: 20,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          // Carousel dots indicator
+          Positioned(
+            bottom: 70,
+            left: 0, right: 0,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(images.length, (i) {
+                return Container(
+                  width: 24,
+                  height: 3,
+                  margin: const EdgeInsets.symmetric(horizontal: 2),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(i == 0 ? 0.9 : 0.4),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                );
+              }),
+            ),
+          ),
+          // Navigation arrows
+          Positioned(
+            left: 8,
+            top: 0, bottom: 0,
+            child: Center(
+              child: GestureDetector(
+                onTap: () => showToast(context, 'Swipe images left/right'),
+                child: Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: Colors.black26,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.chevron_left, color: Colors.white70, size: 20),
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            right: 8,
+            top: 0, bottom: 0,
+            child: Center(
+              child: GestureDetector(
+                onTap: () => showToast(context, 'Swipe images left/right'),
+                child: Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: Colors.black26,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.chevron_right, color: Colors.white70, size: 20),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
