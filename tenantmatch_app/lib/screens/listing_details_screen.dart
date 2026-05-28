@@ -372,11 +372,11 @@ class _ListingDetailsScreenState extends State<ListingDetailsScreen> {
               ),
             ),
           // Tenant score (bottom-right)
-          Semantics(
-            label: 'Tenant score ${p.tenantScore} out of 100',
-            child: Positioned(
-              bottom: 12,
-              right: 12,
+          Positioned(
+            bottom: 12,
+            right: 12,
+            child: Semantics(
+              label: 'Tenant score ${p.tenantScore} out of 100',
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                 decoration: BoxDecoration(

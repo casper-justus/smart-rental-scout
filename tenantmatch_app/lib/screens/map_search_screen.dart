@@ -44,11 +44,15 @@ class _MapSearchScreenState extends State<MapSearchScreen> {
   }
 
   Future<void> _initTileCache() async {
-    final dir = await getApplicationDocumentsDirectory();
-    final store = DbCacheStore(databasePath: '${dir.path}/map_tiles.sqlite');
-    setState(() {
-      _tileProvider = CachedTileProvider(store: store);
-    });
+    try {
+      final dir = await getApplicationDocumentsDirectory();
+      final store = DbCacheStore(databasePath: '${dir.path}/map_tiles.sqlite');
+      setState(() {
+        _tileProvider = CachedTileProvider(store: store);
+      });
+    } catch (_) {
+      // Tile cache unavailable; map uses default NetworkTileProvider
+    }
   }
 
   @override
@@ -375,7 +379,7 @@ class _MapSearchScreenState extends State<MapSearchScreen> {
             TileLayer(
               urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
               userAgentPackageName: 'com.tenantmatch.app',
-              tileProvider: _tileProvider,
+              tileProvider: _tileProvider ?? NetworkTileProvider(),
             ),
             MarkerLayer(
               markers: _filteredProps.map((p) => Marker(
