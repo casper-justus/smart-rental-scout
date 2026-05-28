@@ -47,11 +47,7 @@ class _MapSearchScreenState extends State<MapSearchScreen> {
     final dir = await getApplicationDocumentsDirectory();
     final store = DbCacheStore(databasePath: '${dir.path}/map_tiles.sqlite');
     setState(() {
-      _tileProvider = CachedTileProvider(
-        maxAge: const Duration(days: 30),
-        maxStale: const Duration(days: 60),
-        cacheStore: store,
-      );
+      _tileProvider = CachedTileProvider(cacheStore: store);
     });
   }
 

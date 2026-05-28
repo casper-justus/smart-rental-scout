@@ -283,7 +283,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 child: const Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Icon(Icons._3d_rotation, size: 12, color: Colors.cyanAccent),
+                                    Icon(Icons.threesixty, size: 12, color: Colors.cyanAccent),
                                     SizedBox(width: 4),
                                     Text('360°', style: TextStyle(color: Colors.cyanAccent, fontSize: 10, fontWeight: FontWeight.bold)),
                                   ],

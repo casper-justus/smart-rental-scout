@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:panorama_viewer/panorama_viewer.dart';
+import 'package:panorama_viewer/panorama_viewer.dart' as pv;
 import '../theme/app_theme.dart';
 import '../widgets/toast.dart';
 
@@ -81,11 +81,10 @@ class _VirtualTourScreenState extends State<VirtualTourScreen> {
       backgroundColor: Colors.black,
       body: Stack(
         children: [
-          PanoramaViewer(
-            image: NetworkImage(room.imageUrl),
-            enableTouch: true,
-            enableSensor: true,
-            enableAnimation: true,
+          pv.PanoramaViewer(
+            child: Image.network(room.imageUrl, fit: BoxFit.cover),
+            interactive: true,
+            sensorControl: pv.SensorControl.orientation,
           ),
           // Gradient top bar
           Positioned(
