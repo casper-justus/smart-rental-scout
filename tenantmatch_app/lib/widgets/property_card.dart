@@ -177,11 +177,11 @@ class _PropertyCardState extends State<PropertyCard> {
                 ),
               ),
             ),
-          // Tenant score (bottom-left on cards)
+          // Tenant score (bottom-right on cards)
           if (widget.showTenantScore)
             Positioned(
               bottom: 12,
-              left: 12,
+              right: 12,
               child: Semantics(
                 label: 'Tenant score: ${widget.property.tenantScore} out of 100',
                 child: Container(

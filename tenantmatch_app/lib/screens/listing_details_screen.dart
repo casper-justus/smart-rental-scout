@@ -399,12 +399,12 @@ class _ListingDetailsScreenState extends State<ListingDetailsScreen> {
             ),
           ),
           // Favorite button
-          Semantics(
-            label: _isFav ? 'Remove from favorites' : 'Add to favorites',
-            button: true,
-            child: Positioned(
-              top: 12,
-              right: 12,
+          Positioned(
+            top: 12,
+            right: 12,
+            child: Semantics(
+              label: _isFav ? 'Remove from favorites' : 'Add to favorites',
+              button: true,
               child: GestureDetector(
                 onTap: () async {
                   await favoritesService.toggle(p.id);
