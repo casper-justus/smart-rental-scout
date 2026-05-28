@@ -158,7 +158,7 @@ class _HomeScreenState extends State<HomeScreen> {
               SizedBox(width: AppTheme.gutter),
               _actionCard(Icons.bookmark, 'Saved Searches', '2 new listings', context, () => Navigator.pushNamed(context, '/saved')),
               SizedBox(width: AppTheme.gutter),
-              _actionCard(Icons.view_in_ar, 'Virtual Tours', 'Explore remotely', context, () => Navigator.pushNamed(context, '/virtual-tour', arguments: 'prop_1')),
+              _actionCard(Icons.view_in_ar, 'Virtual Tours', 'Explore remotely', context, () => Navigator.pushNamed(context, '/virtual-tour-list')),
             ],
           ),
         ),

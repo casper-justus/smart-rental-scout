@@ -12,6 +12,7 @@ import 'screens/discovery_commute_setup_screen.dart';
 import 'screens/commute_hub_settings_screen.dart';
 import 'screens/compare_properties_screen.dart';
 import 'screens/virtual_tour_screen.dart';
+import 'screens/virtual_tour_list_screen.dart';
 import 'screens/application_portal_step1_screen.dart';
 import 'screens/application_portal_step2_screen.dart';
 import 'screens/application_portal_step3_screen.dart';
@@ -63,6 +64,9 @@ class TenantMatchApp extends StatelessWidget {
                 break;
               case '/compare':
                 screen = const ComparePropertiesScreen();
+                break;
+              case '/virtual-tour-list':
+                screen = const VirtualTourListScreen();
                 break;
               case '/virtual-tour':
                 final propId = settings.arguments as String? ?? '';
