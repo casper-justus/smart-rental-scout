@@ -58,19 +58,11 @@ class _VirtualTourScreenState extends State<VirtualTourScreen> {
   void initState() {
     super.initState();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.landscapeLeft,
-      DeviceOrientation.landscapeRight,
-    ]);
   }
 
   @override
   void dispose() {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.portraitDown,
-    ]);
     super.dispose();
   }
 
@@ -115,7 +107,7 @@ class _VirtualTourScreenState extends State<VirtualTourScreen> {
                   ),
                   IconButton(
                     icon: const Icon(Icons.screen_rotation, color: Colors.white70),
-                    onPressed: () => showToast(context, 'Rotate device or drag to look around'),
+                    onPressed: () => showToast(context, 'Drag to look around in portrait or landscape'),
                   ),
                 ],
               ),
