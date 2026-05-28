@@ -18,12 +18,20 @@ class ListingDetailsScreen extends StatefulWidget {
 class _ListingDetailsScreenState extends State<ListingDetailsScreen> {
   late PropertyListing p;
   late bool _isFav;
+  final _pageCtrl = PageController();
+  var _currentPage = 0;
 
   @override
   void initState() {
     super.initState();
     p = PropertyListing.fromId(widget.propertyId);
     _isFav = favoritesService.isFavorite(p.id);
+  }
+
+  @override
+  void dispose() {
+    _pageCtrl.dispose();
+    super.dispose();
   }
 
   void _refreshFav() {
@@ -287,7 +295,9 @@ class _ListingDetailsScreenState extends State<ListingDetailsScreen> {
       child: Stack(
         children: [
           PageView.builder(
+            controller: _pageCtrl,
             itemCount: images.length,
+            onPageChanged: (i) => setState(() => _currentPage = i),
             itemBuilder: (context, index) {
               return Hero(
                 tag: index == 0 ? 'property_img_${p.id}' : 'property_img_${p.id}_$index',
@@ -429,7 +439,7 @@ class _ListingDetailsScreenState extends State<ListingDetailsScreen> {
                   height: 3,
                   margin: const EdgeInsets.symmetric(horizontal: 2),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(i == 0 ? 0.9 : 0.4),
+                    color: Colors.white.withOpacity(i == _currentPage ? 0.9 : 0.4),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 );

@@ -227,89 +227,19 @@ class _HomeScreenState extends State<HomeScreen> {
         SizedBox(height: AppTheme.spacingSm),
         Text('360° walkthroughs available', style: AppTextStyle.bodyMd.copyWith(color: cs.onSurfaceVariant)),
         SizedBox(height: AppTheme.spacingMd),
-        SizedBox(
-          height: 180,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            physics: const BouncingScrollPhysics(),
-            itemCount: tourProps.length,
-            itemBuilder: (context, index) {
-              final p = tourProps[index];
-              return GestureDetector(
-                onTap: () => Navigator.pushNamed(context, '/virtual-tour', arguments: p.id),
-                child: Container(
-                  width: 160,
-                  margin: EdgeInsets.only(right: AppTheme.gutter),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: cs.outlineVariant),
-                  ),
-                  clipBehavior: Clip.antiAlias,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Stack(
-                          children: [
-                            CachedNetworkImage(
-                              imageUrl: p.imageUrl,
-                              fit: BoxFit.cover,
-                              width: double.infinity,
-                              height: double.infinity,
-                              memCacheWidth: 320,
-                              memCacheHeight: 240,
-                              placeholder: (_, __) => Container(color: AppTheme.surfaceContainerOf(context)),
-                              errorWidget: (_, __, ___) => Icon(Icons.home_outlined, color: cs.onSurfaceVariant),
-                            ),
-                            Container(
-                              alignment: Alignment.center,
-                              decoration: const BoxDecoration(
-                                gradient: LinearGradient(
-                                  begin: Alignment.topCenter,
-                                  end: Alignment.bottomCenter,
-                                  colors: [Colors.transparent, Colors.black45],
-                                ),
-                              ),
-                              child: const Icon(Icons.view_in_ar, color: Colors.white, size: 32),
-                            ),
-                            Positioned(
-                              top: 8, right: 8,
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-                                decoration: BoxDecoration(
-                                  color: Colors.black54,
-                                  borderRadius: BorderRadius.circular(6),
-                                ),
-                                child: const Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(Icons.threesixty, size: 12, color: Colors.cyanAccent),
-                                    SizedBox(width: 4),
-                                    Text('360°', style: TextStyle(color: Colors.cyanAccent, fontSize: 10, fontWeight: FontWeight.bold)),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(p.price, style: AppTextStyle.headlineSm.copyWith(color: cs.primary)),
-                            Text(p.address, style: AppTextStyle.bodyMd.copyWith(fontSize: 11), maxLines: 1, overflow: TextOverflow.ellipsis),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
+        ...tourProps.map((p) => Padding(
+          padding: EdgeInsets.only(bottom: AppTheme.gutter),
+          child: PropertyCard(
+            property: p,
+            isFavorite: favoritesService.isFavorite(p.id),
+            onTap: () => Navigator.pushNamed(context, '/virtual-tour', arguments: p.id),
+            onFavoriteTap: () async {
+              await favoritesService.toggle(p.id);
+              setState(() {});
             },
+            compact: true,
           ),
-        ),
+        )),
       ],
     );
   }

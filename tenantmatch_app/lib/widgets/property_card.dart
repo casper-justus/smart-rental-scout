@@ -5,7 +5,7 @@ import '../theme/app_theme.dart';
 import '../models/property.dart';
 import '../main.dart';
 
-class PropertyCard extends StatelessWidget {
+class PropertyCard extends StatefulWidget {
   final PropertyListing property;
   final bool isFavorite;
   final VoidCallback onTap;
@@ -24,15 +24,37 @@ class PropertyCard extends StatelessWidget {
   });
 
   @override
+  State<PropertyCard> createState() => _PropertyCardState();
+}
+
+class _PropertyCardState extends State<PropertyCard> {
+  final _pageCtrl = PageController();
+  var _currentPage = 0;
+
+  @override
+  void didUpdateWidget(PropertyCard oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.property.id != widget.property.id) {
+      _currentPage = 0;
+    }
+  }
+
+  @override
+  void dispose() {
+    _pageCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return Semantics(
-      label: 'Property: ${property.price}, ${property.address}. ${property.beds} bedrooms, ${property.baths} bathrooms, ${property.sqft} square feet${property.petsOk ? ', pets allowed' : ''}',
+      label: 'Property: ${widget.property.price}, ${widget.property.address}. ${widget.property.beds} bedrooms, ${widget.property.baths} bathrooms, ${widget.property.sqft} square feet${widget.property.petsOk ? ', pets allowed' : ''}',
       child: GestureDetector(
-        onTap: onTap,
+        onTap: widget.onTap,
         onLongPress: () {
           HapticFeedback.mediumImpact();
-          if (onFavoriteTap != null) onFavoriteTap!();
+          if (widget.onFavoriteTap != null) widget.onFavoriteTap!();
         },
         child: Container(
           decoration: BoxDecoration(
@@ -50,14 +72,14 @@ class PropertyCard extends StatelessWidget {
           clipBehavior: Clip.antiAlias,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: compact ? MainAxisSize.min : MainAxisSize.max,
+            mainAxisSize: widget.compact ? MainAxisSize.min : MainAxisSize.max,
             children: [
               // Image section
               _buildImageSection(context),
               // Name/Address space below image
               _buildNameSection(context),
               // Details section — hidden in compact mode to prevent overflow
-              if (!compact) _buildDetailsSection(context),
+              if (!widget.compact) _buildDetailsSection(context),
             ],
           ),
         ),
@@ -67,10 +89,10 @@ class PropertyCard extends StatelessWidget {
 
   Widget _buildImageSection(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final imgHeight = compact ? 100 : 160;
-    final decodeWidth = compact ? 300 : 400;
-    final decodeHeight = compact ? 180 : 240;
-    final imgs = property.images;
+    final imgHeight = widget.compact ? 100 : 160;
+    final decodeWidth = widget.compact ? 300 : 400;
+    final decodeHeight = widget.compact ? 180 : 240;
+    final imgs = widget.property.images;
 
     return RepaintBoundary(
       child: Stack(
@@ -78,10 +100,12 @@ class PropertyCard extends StatelessWidget {
           SizedBox(
             height: imgHeight.toDouble(),
             child: PageView.builder(
+              controller: _pageCtrl,
               itemCount: imgs.length,
+              onPageChanged: (i) => setState(() => _currentPage = i),
               itemBuilder: (context, index) {
                 return Hero(
-                  tag: index == 0 ? 'property_img_${property.id}' : 'property_img_${property.id}_$index',
+                  tag: index == 0 ? 'property_img_${widget.property.id}' : 'property_img_${widget.property.id}_$index',
                   child: Container(
                     color: AppTheme.surfaceContainerOf(context),
                     child: CachedNetworkImage(
@@ -115,7 +139,7 @@ class PropertyCard extends StatelessWidget {
                   height: 3,
                   margin: const EdgeInsets.symmetric(horizontal: 1.5),
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(i == 0 ? 0.9 : 0.4),
+                    color: Colors.white.withOpacity(i == _currentPage ? 0.9 : 0.4),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 );
@@ -123,7 +147,7 @@ class PropertyCard extends StatelessWidget {
             ),
           ),
           // Hot / Great Value badge (top-right)
-          if (property.isHot || property.isGreatValue)
+          if (widget.property.isHot || widget.property.isGreatValue)
             Positioned(
               top: 12,
               right: 52,
@@ -138,15 +162,15 @@ class PropertyCard extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(
-                      property.isHot ? Icons.local_fire_department : Icons.star,
+                      widget.property.isHot ? Icons.local_fire_department : Icons.star,
                       size: 14,
-                      color: property.chipColor,
+                      color: widget.property.chipColor,
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      property.chipLabel,
+                      widget.property.chipLabel,
                       style: AppTextStyle.labelCaps.copyWith(
-                        color: property.chipColor,
+                        color: widget.property.chipColor,
                       ),
                     ),
                   ],
@@ -154,12 +178,12 @@ class PropertyCard extends StatelessWidget {
               ),
             ),
           // Tenant score (bottom-left on cards)
-          if (showTenantScore)
+          if (widget.showTenantScore)
             Positioned(
               bottom: 12,
               left: 12,
               child: Semantics(
-                label: 'Tenant score: ${property.tenantScore} out of 100',
+                label: 'Tenant score: ${widget.property.tenantScore} out of 100',
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
@@ -172,7 +196,7 @@ class PropertyCard extends StatelessWidget {
                       Icon(Icons.analytics_outlined,
                           size: 14, color: cs.onSecondaryContainer),
                       const SizedBox(width: 4),
-                      Text('${property.tenantScore}',
+                      Text('${widget.property.tenantScore}',
                           style: AppTextStyle.headlineSm.copyWith(
                             color: cs.onSecondaryContainer,
                             fontSize: 12,
@@ -187,10 +211,10 @@ class PropertyCard extends StatelessWidget {
             top: 12,
             right: 12,
             child: Semantics(
-              label: isFavorite ? 'Remove from favorites' : 'Add to favorites',
+              label: widget.isFavorite ? 'Remove from favorites' : 'Add to favorites',
               button: true,
               child: GestureDetector(
-                onTap: onFavoriteTap,
+                onTap: widget.onFavoriteTap,
                 child: Container(
                   width: 40,
                   height: 40,
@@ -199,8 +223,8 @@ class PropertyCard extends StatelessWidget {
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
-                    isFavorite ? Icons.favorite : Icons.favorite_border,
-                    color: isFavorite ? cs.error : cs.onSurfaceVariant,
+                    widget.isFavorite ? Icons.favorite : Icons.favorite_border,
+                    color: widget.isFavorite ? cs.error : cs.onSurfaceVariant,
                     size: 20,
                   ),
                 ),
@@ -219,7 +243,7 @@ class PropertyCard extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       color: cs.surface,
       child: Text(
-        property.address,
+        widget.property.address,
         style: AppTextStyle.bodyMd.copyWith(
           color: cs.onSurface,
           fontWeight: FontWeight.w600,
@@ -241,16 +265,16 @@ class PropertyCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                property.price,
+                widget.property.price,
                 style: AppTextStyle.headlineMd.copyWith(color: cs.primary),
               ),
-              if (property.transitScore > 0)
+              if (widget.property.transitScore > 0)
                 Row(
                   children: [
                     Icon(Icons.directions_walk,
                         size: 16, color: cs.onSurfaceVariant),
                     const SizedBox(width: 2),
-                    Text('${property.transitScore}',
+                    Text('${widget.property.transitScore}',
                         style: AppTextStyle.labelCaps),
                   ],
                 ),
@@ -259,12 +283,12 @@ class PropertyCard extends StatelessWidget {
           const SizedBox(height: 12),
           Row(
             children: [
-              _buildPerkChip('${property.beds}', 'BED', context),
+              _buildPerkChip('${widget.property.beds}', 'BED', context),
               const SizedBox(width: 8),
-              _buildPerkChip('${property.baths}', 'BATH', context),
+              _buildPerkChip('${widget.property.baths}', 'BATH', context),
               const SizedBox(width: 8),
-              _buildPerkChip('${property.sqft}', 'SQFT', context),
-              if (property.petsOk) ...[
+              _buildPerkChip('${widget.property.sqft}', 'SQFT', context),
+              if (widget.property.petsOk) ...[
                 const SizedBox(width: 8),
                 _buildPerkChip(null, 'PETS OK', context, icon: Icons.pets),
               ],
@@ -274,7 +298,7 @@ class PropertyCard extends StatelessWidget {
             const SizedBox(height: 10),
             _buildCommuteTimes(context),
           ],
-          if (property.insight.isNotEmpty) ...[
+          if (widget.property.insight.isNotEmpty) ...[
             const SizedBox(height: 12),
             Container(
               padding: const EdgeInsets.only(top: 12),
@@ -290,9 +314,9 @@ class PropertyCard extends StatelessWidget {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Semantics(
-                      label: 'Insight: ${property.insight}',
+                      label: 'Insight: ${widget.property.insight}',
                       child: Text(
-                        property.insight,
+                        widget.property.insight,
                         style: AppTextStyle.bodyMd.copyWith(color: cs.onSurface),
                       ),
                     ),
@@ -308,7 +332,7 @@ class PropertyCard extends StatelessWidget {
 
   Widget _buildCommuteTimes(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final times = commuteService.calculateCommuteTimes(property);
+    final times = commuteService.calculateCommuteTimes(widget.property);
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
