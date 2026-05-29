@@ -217,7 +217,7 @@ class _CommuteHubSettingsScreenState extends State<CommuteHubSettingsScreen>
                               border: Border.all(color: cs.outlineVariant),
                             ),
                             padding:
-                                EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                                EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                             child: Row(children: [
                               Icon(Icons.label_outline,
                                   color: cs.onSurfaceVariant, size: 20),
@@ -225,7 +225,10 @@ class _CommuteHubSettingsScreenState extends State<CommuteHubSettingsScreen>
                               Expanded(
                                 child: TextField(
                                   controller: _nameCtrl,
-                                  decoration: InputDecoration.collapsed(
+                                  decoration: InputDecoration(
+                                    border: InputBorder.none,
+                                    isDense: true,
+                                    contentPadding: EdgeInsets.zero,
                                     hintText: 'e.g. Work, Gym, School',
                                     hintStyle: AppTextStyle.bodyMd.copyWith(
                                         color: cs.onSurfaceVariant),
@@ -245,7 +248,7 @@ class _CommuteHubSettingsScreenState extends State<CommuteHubSettingsScreen>
                               border: Border.all(color: cs.outlineVariant),
                             ),
                             padding:
-                                EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                                EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                             child: Row(children: [
                               Icon(Icons.location_on_outlined,
                                   color: cs.onSurfaceVariant, size: 20),
@@ -253,7 +256,10 @@ class _CommuteHubSettingsScreenState extends State<CommuteHubSettingsScreen>
                               Expanded(
                                 child: TextField(
                                   controller: _addrCtrl,
-                                  decoration: InputDecoration.collapsed(
+                                  decoration: InputDecoration(
+                                    border: InputBorder.none,
+                                    isDense: true,
+                                    contentPadding: EdgeInsets.zero,
                                     hintText: 'Enter address or place',
                                     hintStyle: AppTextStyle.bodyMd.copyWith(
                                         color: cs.onSurfaceVariant),

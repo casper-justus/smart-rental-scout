@@ -90,8 +90,8 @@ class _PropertyCardState extends State<PropertyCard> {
   Widget _buildImageSection(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final imgHeight = widget.compact ? 100 : 160;
-    final decodeWidth = widget.compact ? 300 : 400;
-    final decodeHeight = widget.compact ? 180 : 240;
+    final decodeWidth = widget.compact ? 240 : 320;
+    final decodeHeight = widget.compact ? 150 : 200;
     final imgs = widget.property.images;
 
     return RepaintBoundary(

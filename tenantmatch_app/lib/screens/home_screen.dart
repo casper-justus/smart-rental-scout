@@ -64,14 +64,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 SizedBox(height: AppTheme.spacingMd),
                 _buildSearchBar(context),
-                SizedBox(height: AppTheme.spacingLg),
-                _buildQuickActions(context),
-                SizedBox(height: AppTheme.spacingLg),
-                _buildVirtualTours(context, props),
-                SizedBox(height: AppTheme.spacingLg),
-                _buildTopMatches(context, props),
-                SizedBox(height: AppTheme.spacingLg),
-                _buildMarketInsights(context),
+                  SizedBox(height: AppTheme.spacingLg),
+                  RepaintBoundary(child: _buildQuickActions(context)),
+                  SizedBox(height: AppTheme.spacingLg),
+                  RepaintBoundary(child: _buildVirtualTours(context, props)),
+                  SizedBox(height: AppTheme.spacingLg),
+                  _buildTopMatches(context, props),
+                  SizedBox(height: AppTheme.spacingLg),
+                  RepaintBoundary(child: _buildMarketInsights(context)),
                 SizedBox(height: AppTheme.spacingLg + MediaQuery.of(context).padding.bottom),
               ],
             ),
@@ -100,7 +100,7 @@ class _HomeScreenState extends State<HomeScreen> {
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: cs.outlineVariant),
         ),
-        padding: EdgeInsets.symmetric(horizontal: AppTheme.spacingMd, vertical: 14),
+        padding: EdgeInsets.symmetric(horizontal: AppTheme.spacingMd, vertical: 12),
         child: Row(
           children: [
             Icon(Icons.search, color: cs.onSurfaceVariant),
@@ -315,45 +315,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildTopMatches(BuildContext context, List<PropertyListing> props) {
-    final cs = Theme.of(context).colorScheme;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(
-              children: [
-                Icon(Icons.verified, size: 20, color: cs.secondary),
-                SizedBox(width: 8),
-                Text('Your Top Matches', style: AppTextStyle.headlineMd.copyWith(color: cs.primary)),
-              ],
-            ),
-            GestureDetector(
-              onTap: () => Navigator.pushNamed(context, '/search'),
-              child: Text('See all', style: AppTextStyle.headlineSm.copyWith(color: cs.primary)),
-            ),
-          ],
-        ),
-        SizedBox(height: AppTheme.spacingMd),
-        // Show top 3 properties in a vertical list
-        ...props.take(3).map((p) => Padding(
-          padding: EdgeInsets.only(bottom: AppTheme.gutter),
-          child: RepaintBoundary(
-            child: PropertyCard(
-              property: p,
-              isFavorite: favoritesService.isFavorite(p.id),
-              onTap: () => Navigator.pushNamed(context, '/listing-details', arguments: p.id),
-              onFavoriteTap: () async {
-                await favoritesService.toggle(p.id);
-                setState(() {});
-              },
-              showTenantScore: p.tenantScore > 85,
-            ),
-          ),
-        )),
-      ],
-    );
+    return _TopMatchesSection(props: props.take(3).toList());
   }
 
   Widget _buildMarketInsights(BuildContext context) {
@@ -438,6 +400,58 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
         ),
+      ],
+    );
+  }
+}
+
+class _TopMatchesSection extends StatefulWidget {
+  final List<PropertyListing> props;
+  const _TopMatchesSection({required this.props});
+
+  @override
+  State<_TopMatchesSection> createState() => _TopMatchesSectionState();
+}
+
+class _TopMatchesSectionState extends State<_TopMatchesSection> {
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.verified, size: 20, color: cs.secondary),
+                SizedBox(width: 8),
+                Text('Your Top Matches', style: AppTextStyle.headlineMd.copyWith(color: cs.primary)),
+              ],
+            ),
+            GestureDetector(
+              onTap: () => Navigator.pushNamed(context, '/search'),
+              child: Text('See all', style: AppTextStyle.headlineSm.copyWith(color: cs.primary)),
+            ),
+          ],
+        ),
+        SizedBox(height: AppTheme.spacingMd),
+        ...widget.props.map((p) => Padding(
+          padding: EdgeInsets.only(bottom: AppTheme.gutter),
+          child: RepaintBoundary(
+            child: PropertyCard(
+              property: p,
+              isFavorite: favoritesService.isFavorite(p.id),
+              onTap: () => Navigator.pushNamed(context, '/listing-details', arguments: p.id),
+              onFavoriteTap: () async {
+                await favoritesService.toggle(p.id);
+                setState(() {});
+              },
+              showTenantScore: p.tenantScore > 85,
+            ),
+          ),
+        )),
       ],
     );
   }

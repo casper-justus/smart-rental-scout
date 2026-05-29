@@ -263,7 +263,7 @@ class _MapSearchScreenState extends State<MapSearchScreen> {
             border: Border.all(color: cs.outlineVariant),
             boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0, 2))],
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
           child: Row(
             children: [
               Icon(Icons.search, color: cs.onSurfaceVariant),
@@ -271,7 +271,10 @@ class _MapSearchScreenState extends State<MapSearchScreen> {
               Expanded(
                 child: TextField(
                   controller: _searchCtrl,
-                  decoration: InputDecoration.collapsed(
+                  decoration: InputDecoration(
+                    border: InputBorder.none,
+                    isDense: true,
+                    contentPadding: EdgeInsets.zero,
                     hintText: 'Search neighborhoods...',
                     hintStyle: AppTextStyle.bodyMd.copyWith(color: cs.onSurfaceVariant),
                   ),
@@ -357,6 +360,9 @@ class _MapSearchScreenState extends State<MapSearchScreen> {
           options: MapOptions(
             initialCenter: _defaultCenter,
             initialZoom: _defaultZoom,
+            interactionOptions: const InteractionOptions(
+              flags: InteractiveFlag.all,
+            ),
             onTap: (_, __) {
               _clearSelection();
               FocusScope.of(context).unfocus();

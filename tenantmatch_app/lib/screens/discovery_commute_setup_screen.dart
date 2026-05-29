@@ -92,14 +92,20 @@ class _DiscoveryCommuteSetupScreenState extends State<DiscoveryCommuteSetupScree
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(color: cs.outlineVariant),
                           ),
-                          padding: EdgeInsets.symmetric(horizontal: 12),
+                          padding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                           child: Row(children: [
                             Icon(Icons.add_location, color: cs.outline),
                             SizedBox(width: 8),
                             Expanded(
                               child: TextField(
                                 controller: _destCtrl,
-                                decoration: InputDecoration.collapsed(hintText: 'Add a destination...', hintStyle: AppTextStyle.bodyMd.copyWith(color: cs.onSurfaceVariant)),
+                                decoration: InputDecoration(
+                                  border: InputBorder.none,
+                                  isDense: true,
+                                  contentPadding: EdgeInsets.zero,
+                                  hintText: 'Add a destination...',
+                                  hintStyle: AppTextStyle.bodyMd.copyWith(color: cs.onSurfaceVariant),
+                                ),
                               ),
                             ),
                           ]),
@@ -199,13 +205,19 @@ class _DiscoveryCommuteSetupScreenState extends State<DiscoveryCommuteSetupScree
         borderRadius: BorderRadius.circular(8),
         border: Border.all(color: cs.outlineVariant),
       ),
-      padding: EdgeInsets.symmetric(horizontal: 12),
+      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 12),
       child: Row(children: [
         Icon(icon, color: cs.outline),
         SizedBox(width: 8),
         Expanded(child: TextField(
           controller: ctrl,
-          decoration: InputDecoration.collapsed(hintText: hint, hintStyle: AppTextStyle.bodyMd.copyWith(color: cs.onSurfaceVariant)),
+          decoration: InputDecoration(
+            border: InputBorder.none,
+            isDense: true,
+            contentPadding: EdgeInsets.zero,
+            hintText: hint,
+            hintStyle: AppTextStyle.bodyMd.copyWith(color: cs.onSurfaceVariant),
+          ),
         )),
       ]),
     );
