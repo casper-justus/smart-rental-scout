@@ -282,8 +282,7 @@ class _ListingDetailsScreenState extends State<ListingDetailsScreen> {
                 ],
               ),
             ),
-          ],
-        ),
+        ],
       ),
     );
   }
