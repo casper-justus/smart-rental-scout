@@ -21,14 +21,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final _searchCtrl = TextEditingController();
   DateTime? _lastBackPress;
-
-  @override
-  void dispose() {
-    _searchCtrl.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -93,33 +86,27 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildSearchBar(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return GestureDetector(
-      onTap: () => Navigator.pushNamed(context, '/search', arguments: _searchCtrl.text),
+      onTap: () => Navigator.pushNamed(context, '/search'),
       child: Container(
         decoration: BoxDecoration(
           color: cs.surface,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: cs.outlineVariant),
         ),
-        padding: EdgeInsets.symmetric(horizontal: AppTheme.spacingMd, vertical: 12),
+        padding: EdgeInsets.symmetric(horizontal: AppTheme.spacingMd, vertical: 14),
         child: Row(
           children: [
             Icon(Icons.search, color: cs.onSurfaceVariant),
             SizedBox(width: AppTheme.spacingSm),
             Expanded(
-              child: TextField(
-                controller: _searchCtrl,
-                readOnly: true,
-                decoration: InputDecoration.collapsed(
-                  hintText: 'Search neighborhoods, ZIP codes...',
-                  hintStyle: AppTextStyle.bodyMd.copyWith(color: cs.onSurfaceVariant),
-                ),
-                textInputAction: TextInputAction.search,
-                onTap: () => Navigator.pushNamed(context, '/search', arguments: _searchCtrl.text),
+              child: Text(
+                'Search neighborhoods, ZIP codes...',
+                style: AppTextStyle.bodyMd.copyWith(color: cs.onSurfaceVariant),
               ),
             ),
             SizedBox(width: AppTheme.spacingSm),
             GestureDetector(
-              onTap: () => Navigator.pushNamed(context, '/search', arguments: _searchCtrl.text),
+      onTap: () => Navigator.pushNamed(context, '/search'),
               child: Container(
                 padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 decoration: BoxDecoration(
