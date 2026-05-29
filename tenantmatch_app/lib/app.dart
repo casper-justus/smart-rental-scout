@@ -50,7 +50,7 @@ class TenantMatchApp extends StatelessWidget {
                 screen = const HomeScreen();
                 break;
               case '/search':
-                screen = const MapSearchScreen();
+                screen = MapSearchScreen(initialQuery: settings.arguments as String?);
                 break;
               case '/listing-details':
                 final propId = settings.arguments as String? ?? 'prop_1';

@@ -43,14 +43,15 @@ class _ListingDetailsScreenState extends State<ListingDetailsScreen> {
     final cs = Theme.of(context).colorScheme;
     return Scaffold(
       backgroundColor: cs.surface,
-      body: SafeArea(
-        child: Column(
-          children: [
-            AppTopBar(showBack: true),
-            Expanded(
-              child: ListView(
-                physics: const BouncingScrollPhysics(),
-                children: [
+      body: Column(
+        children: [
+          SizedBox(height: MediaQuery.of(context).padding.top),
+          AppTopBar(showBack: true),
+          Expanded(
+            child: ListView(
+              physics: const BouncingScrollPhysics(),
+              padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
+              children: [
                   // Image carousel
                   _buildImageCarousel(context),
                   Padding(

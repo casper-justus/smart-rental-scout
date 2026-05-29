@@ -48,44 +48,43 @@ class _HomeScreenState extends State<HomeScreen> {
       },
       child: Scaffold(
       backgroundColor: cs.surface,
-      body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: ListView(
-                padding: EdgeInsets.symmetric(horizontal: AppTheme.containerMargin),
-                physics: const BouncingScrollPhysics(),
-                children: [
-                  AppTopBar(showBack: false),
-                  SizedBox(height: AppTheme.spacingMd),
-                  Text(
-                    'Good morning, Jane.\nReady to find your match?',
-                    style: AppTextStyle.headlineLgMobile.copyWith(color: cs.primary),
-                  ),
-                  SizedBox(height: AppTheme.spacingMd),
-                  _buildSearchBar(context),
-                  SizedBox(height: AppTheme.spacingLg),
-                  _buildQuickActions(context),
-                  SizedBox(height: AppTheme.spacingLg),
-                  _buildVirtualTours(context, props),
-                  SizedBox(height: AppTheme.spacingLg),
-                  _buildTopMatches(context, props),
-                  SizedBox(height: AppTheme.spacingLg),
-                  _buildMarketInsights(context),
-                  SizedBox(height: AppTheme.spacingLg),
-                ],
-              ),
+      body: Column(
+        children: [
+          Expanded(
+            child: ListView(
+              padding: EdgeInsets.symmetric(horizontal: AppTheme.containerMargin),
+              physics: const BouncingScrollPhysics(),
+              children: [
+                SizedBox(height: MediaQuery.of(context).padding.top + 8),
+                AppTopBar(showBack: false),
+                SizedBox(height: AppTheme.spacingMd),
+                Text(
+                  'Good morning, Jane.\nReady to find your match?',
+                  style: AppTextStyle.headlineLgMobile.copyWith(color: cs.primary),
+                ),
+                SizedBox(height: AppTheme.spacingMd),
+                _buildSearchBar(context),
+                SizedBox(height: AppTheme.spacingLg),
+                _buildQuickActions(context),
+                SizedBox(height: AppTheme.spacingLg),
+                _buildVirtualTours(context, props),
+                SizedBox(height: AppTheme.spacingLg),
+                _buildTopMatches(context, props),
+                SizedBox(height: AppTheme.spacingLg),
+                _buildMarketInsights(context),
+                SizedBox(height: AppTheme.spacingLg + MediaQuery.of(context).padding.bottom),
+              ],
             ),
-            AppBottomNav(
-              currentIndex: 0,
-              onTap: (i) {
-                if (i == 1) Navigator.pushNamed(context, '/search');
-                if (i == 2) Navigator.pushNamed(context, '/saved');
-                if (i == 3) Navigator.pushNamed(context, '/profile');
-              },
-            ),
-          ],
-        ),
+          ),
+          AppBottomNav(
+            currentIndex: 0,
+            onTap: (i) {
+              if (i == 1) Navigator.pushNamed(context, '/search');
+              if (i == 2) Navigator.pushNamed(context, '/saved');
+              if (i == 3) Navigator.pushNamed(context, '/profile');
+            },
+          ),
+        ],
       ),
     ),
     );
@@ -93,50 +92,51 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildSearchBar(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    return Container(
-      decoration: BoxDecoration(
-        color: cs.surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: cs.outlineVariant),
-      ),
-      padding: EdgeInsets.symmetric(horizontal: AppTheme.spacingMd, vertical: 8),
-      child: Row(
-        children: [
-          Icon(Icons.search, color: cs.onSurfaceVariant),
-          SizedBox(width: AppTheme.spacingSm),
-          Expanded(
-            child: TextField(
-              controller: _searchCtrl,
-              decoration: InputDecoration.collapsed(
-                hintText: 'Search neighborhoods, ZIP codes...',
-                hintStyle: AppTextStyle.bodyMd.copyWith(color: cs.onSurfaceVariant),
-              ),
-              textInputAction: TextInputAction.search,
-              onSubmitted: (query) => Navigator.pushNamed(
-                context, '/search',
-                arguments: query,
-              ),
-            ),
-          ),
-          SizedBox(width: AppTheme.spacingSm),
-          GestureDetector(
-            onTap: () => Navigator.pushNamed(context, '/search', arguments: _searchCtrl.text),
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                color: cs.primary,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.tune, size: 16, color: cs.onPrimary),
-                  SizedBox(width: 4),
-                  Text('Filters', style: AppTextStyle.bodyMd.copyWith(color: cs.onPrimary)),
-                ],
+    return GestureDetector(
+      onTap: () => Navigator.pushNamed(context, '/search', arguments: _searchCtrl.text),
+      child: Container(
+        decoration: BoxDecoration(
+          color: cs.surface,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: cs.outlineVariant),
+        ),
+        padding: EdgeInsets.symmetric(horizontal: AppTheme.spacingMd, vertical: 14),
+        child: Row(
+          children: [
+            Icon(Icons.search, color: cs.onSurfaceVariant),
+            SizedBox(width: AppTheme.spacingSm),
+            Expanded(
+              child: TextField(
+                controller: _searchCtrl,
+                readOnly: true,
+                decoration: InputDecoration.collapsed(
+                  hintText: 'Search neighborhoods, ZIP codes...',
+                  hintStyle: AppTextStyle.bodyMd.copyWith(color: cs.onSurfaceVariant),
+                ),
+                textInputAction: TextInputAction.search,
+                onTap: () => Navigator.pushNamed(context, '/search', arguments: _searchCtrl.text),
               ),
             ),
-          ),
-        ],
+            SizedBox(width: AppTheme.spacingSm),
+            GestureDetector(
+              onTap: () => Navigator.pushNamed(context, '/search', arguments: _searchCtrl.text),
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: cs.primary,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.tune, size: 16, color: cs.onPrimary),
+                    SizedBox(width: 4),
+                    Text('Filters', style: AppTextStyle.bodyMd.copyWith(color: cs.onPrimary)),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -339,15 +339,17 @@ class _HomeScreenState extends State<HomeScreen> {
         // Show top 3 properties in a vertical list
         ...props.take(3).map((p) => Padding(
           padding: EdgeInsets.only(bottom: AppTheme.gutter),
-          child: PropertyCard(
-            property: p,
-            isFavorite: favoritesService.isFavorite(p.id),
-            onTap: () => Navigator.pushNamed(context, '/listing-details', arguments: p.id),
-            onFavoriteTap: () async {
-              await favoritesService.toggle(p.id);
-              setState(() {});
-            },
-            showTenantScore: p.tenantScore > 85,
+          child: RepaintBoundary(
+            child: PropertyCard(
+              property: p,
+              isFavorite: favoritesService.isFavorite(p.id),
+              onTap: () => Navigator.pushNamed(context, '/listing-details', arguments: p.id),
+              onFavoriteTap: () async {
+                await favoritesService.toggle(p.id);
+                setState(() {});
+              },
+              showTenantScore: p.tenantScore > 85,
+            ),
           ),
         )),
       ],

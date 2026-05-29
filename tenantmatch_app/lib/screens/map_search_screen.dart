@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:flutter_map_cache/flutter_map_cache.dart';
-import 'package:dio_cache_interceptor_db_store/dio_cache_interceptor_db_store.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:path_provider/path_provider.dart';
 import '../theme/app_theme.dart';
 import '../widgets/property_card.dart';
 import '../widgets/bottom_nav.dart';
@@ -15,20 +12,21 @@ import '../models/property.dart';
 import '../main.dart';
 
 class MapSearchScreen extends StatefulWidget {
-  const MapSearchScreen({super.key});
+  final String? initialQuery;
+
+  const MapSearchScreen({super.key, this.initialQuery});
 
   @override
   State<MapSearchScreen> createState() => _MapSearchScreenState();
 }
 
 class _MapSearchScreenState extends State<MapSearchScreen> {
-  final _searchCtrl = TextEditingController();
+  late final TextEditingController _searchCtrl;
   final MapController _mapCtrl = MapController();
   FilterOptions _filters = const FilterOptions();
   List<PropertyListing> _filteredProps = PropertyListing.sampleProperties;
   PropertyListing? _selectedProperty;
   bool _isListView = false;
-  CachedTileProvider? _tileProvider;
 
   static const _defaultCenter = LatLng(37.7749, -122.4194);
   static const _defaultZoom = 13.0;
@@ -38,21 +36,12 @@ class _MapSearchScreenState extends State<MapSearchScreen> {
   @override
   void initState() {
     super.initState();
+    _searchCtrl = TextEditingController(text: widget.initialQuery ?? '');
     _filteredProps = PropertyListing.sampleProperties;
-    _initTileCache();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _initLocation());
-  }
-
-  Future<void> _initTileCache() async {
-    try {
-      final dir = await getApplicationDocumentsDirectory();
-      final store = DbCacheStore(databasePath: '${dir.path}/map_tiles.sqlite');
-      setState(() {
-        _tileProvider = CachedTileProvider(store: store);
-      });
-    } catch (_) {
-      // Tile cache unavailable; map uses default NetworkTileProvider
+    if (widget.initialQuery != null && widget.initialQuery!.isNotEmpty) {
+      _applyFiltersAndSearch();
     }
+    WidgetsBinding.instance.addPostFrameCallback((_) => _initLocation());
   }
 
   @override
@@ -100,13 +89,13 @@ class _MapSearchScreenState extends State<MapSearchScreen> {
 
   Future<void> _goToMyLocation() async {
     await _initLocation();
-    if (mounted) showToast(context, '📍 Centered on your location');
+    if (mounted) showToast(context, 'Centered on your location');
   }
 
   void _selectProperty(PropertyListing p) {
     setState(() {
       _selectedProperty = p;
-      _isListView = false; // Switch to map if selected from suggestions
+      _isListView = false;
     });
     _mapCtrl.move(LatLng(p.lat, p.lng), 15);
   }
@@ -165,51 +154,49 @@ class _MapSearchScreenState extends State<MapSearchScreen> {
   }
 
   void _onSearchChanged(String value) {
-    setState(() {}); // Trigger rebuild for suggestions
+    setState(() {});
     _applyFiltersAndSearch();
   }
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final topPad = MediaQuery.of(context).padding.top;
 
     return Scaffold(
       backgroundColor: cs.surface,
       resizeToAvoidBottomInset: false,
-      body: SafeArea(
-        child: Stack(
-          children: [
-            Column(
+      body: Stack(
+        children: [
+          Column(
+            children: [
+              Expanded(
+                child: _isListView ? _buildListView(context) : _buildMapView(context),
+              ),
+              AppBottomNav(
+                currentIndex: 1,
+                onTap: (i) {
+                  if (i == 0) Navigator.pushReplacementNamed(context, '/home');
+                  if (i == 2) Navigator.pushReplacementNamed(context, '/saved');
+                  if (i == 3) Navigator.pushReplacementNamed(context, '/profile');
+                },
+              ),
+            ],
+          ),
+          Positioned(
+            top: topPad + 8,
+            left: 16,
+            right: 16,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Expanded(
-                  child: _isListView ? _buildListView(context) : _buildMapView(context),
-                ),
-                AppBottomNav(
-                  currentIndex: 1,
-                  onTap: (i) {
-                    if (i == 0) Navigator.pushReplacementNamed(context, '/home');
-                    if (i == 2) Navigator.pushReplacementNamed(context, '/saved');
-                    if (i == 3) Navigator.pushReplacementNamed(context, '/profile');
-                  },
-                ),
+                _buildSearchBar(context),
+                const SizedBox(height: 12),
+                _buildViewToggle(context),
               ],
             ),
-            // Floating Header (Search Bar + Toggle)
-            Positioned(
-              top: 16,
-              left: 16,
-              right: 16,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  _buildSearchBar(context),
-                  const SizedBox(height: 12),
-                  _buildViewToggle(context),
-                ],
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -379,7 +366,7 @@ class _MapSearchScreenState extends State<MapSearchScreen> {
             TileLayer(
               urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
               userAgentPackageName: 'com.tenantmatch.app',
-              tileProvider: _tileProvider ?? NetworkTileProvider(),
+              tileProvider: NetworkTileProvider(),
             ),
             MarkerLayer(
               markers: _filteredProps.map((p) => Marker(
@@ -397,7 +384,6 @@ class _MapSearchScreenState extends State<MapSearchScreen> {
             ),
           ],
         ),
-        // Zoom Controls
         Positioned(
           right: 16,
           bottom: 220,
@@ -407,7 +393,6 @@ class _MapSearchScreenState extends State<MapSearchScreen> {
             onMyLocation: _goToMyLocation,
           ),
         ),
-        // Property Summary Card
         if (_selectedProperty != null)
           Positioned(
             left: 16, right: 16, bottom: 120,
@@ -423,18 +408,20 @@ class _MapSearchScreenState extends State<MapSearchScreen> {
 
   Widget _buildListView(BuildContext context) {
     return ListView.builder(
-      padding: const EdgeInsets.fromLTRB(16, 140, 16, 16),
+      padding: EdgeInsets.fromLTRB(16, 140 + MediaQuery.of(context).padding.top, 16, 16),
       itemCount: _filteredProps.length,
       itemBuilder: (context, index) {
         final p = _filteredProps[index];
         return Padding(
           padding: const EdgeInsets.only(bottom: 16),
-          child: PropertyCard(
-            property: p,
-            isFavorite: favoritesService.isFavorite(p.id),
-            onTap: () => Navigator.pushNamed(context, '/listing-details', arguments: p.id),
-            onFavoriteTap: () => setState(() => favoritesService.toggle(p.id)),
-            showTenantScore: true,
+          child: RepaintBoundary(
+            child: PropertyCard(
+              property: p,
+              isFavorite: favoritesService.isFavorite(p.id),
+              onTap: () => Navigator.pushNamed(context, '/listing-details', arguments: p.id),
+              onFavoriteTap: () => setState(() => favoritesService.toggle(p.id)),
+              showTenantScore: true,
+            ),
           ),
         );
       },
