@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_map_cancellable_tile_provider/flutter_map_cancellable_tile_provider.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../theme/app_theme.dart';
 import '../widgets/property_card.dart';
 import '../widgets/bottom_nav.dart';
@@ -28,10 +30,17 @@ class _MapSearchScreenState extends State<MapSearchScreen> {
   PropertyListing? _selectedProperty;
   bool _isListView = false;
 
-  static const _defaultCenter = LatLng(37.7749, -122.4194);
+  static const _defaultCenter = LatLng(-1.2921, 36.8219);
   static const _defaultZoom = 13.0;
   static const _maxZoom = 17.0;
   static const _minZoom = 10.0;
+  static const _prefsKeyLat = 'map_last_lat';
+  static const _prefsKeyLng = 'map_last_lng';
+  static const _prefsKeyZoom = 'map_last_zoom';
+
+  LatLng _initialCenter = _defaultCenter;
+  double _initialZoom = _defaultZoom;
+  bool _positionRestored = false;
 
   @override
   void initState() {
@@ -41,7 +50,32 @@ class _MapSearchScreenState extends State<MapSearchScreen> {
     if (widget.initialQuery != null && widget.initialQuery!.isNotEmpty) {
       _applyFiltersAndSearch();
     }
+    _restoreMapPosition();
     WidgetsBinding.instance.addPostFrameCallback((_) => _initLocation());
+  }
+
+  Future<void> _restoreMapPosition() async {
+    final prefs = await SharedPreferences.getInstance();
+    final lat = prefs.getDouble(_prefsKeyLat);
+    final lng = prefs.getDouble(_prefsKeyLng);
+    final zoom = prefs.getDouble(_prefsKeyZoom);
+    if (lat != null && lng != null && zoom != null) {
+      _initialCenter = LatLng(lat, lng);
+      _initialZoom = zoom;
+      _positionRestored = true;
+      if (mounted) {
+        _mapCtrl.move(_initialCenter, _initialZoom);
+      }
+    }
+  }
+
+  Future<void> _saveMapPosition() async {
+    final prefs = await SharedPreferences.getInstance();
+    final center = _mapCtrl.camera.center;
+    final zoom = _mapCtrl.camera.zoom;
+    await prefs.setDouble(_prefsKeyLat, center.latitude);
+    await prefs.setDouble(_prefsKeyLng, center.longitude);
+    await prefs.setDouble(_prefsKeyZoom, zoom);
   }
 
   @override
@@ -275,7 +309,7 @@ class _MapSearchScreenState extends State<MapSearchScreen> {
                     border: InputBorder.none,
                     isDense: true,
                     contentPadding: EdgeInsets.zero,
-                    hintText: 'Search neighborhoods...',
+                    hintText: 'Search Nairobi neighborhoods...',
                     hintStyle: AppTextStyle.bodyMd.copyWith(color: cs.onSurfaceVariant),
                   ),
                   onChanged: _onSearchChanged,
@@ -358,8 +392,8 @@ class _MapSearchScreenState extends State<MapSearchScreen> {
         FlutterMap(
           mapController: _mapCtrl,
           options: MapOptions(
-            initialCenter: _defaultCenter,
-            initialZoom: _defaultZoom,
+            initialCenter: _initialCenter,
+            initialZoom: _initialZoom,
             interactionOptions: const InteractionOptions(
               flags: InteractiveFlag.all,
             ),
@@ -367,12 +401,17 @@ class _MapSearchScreenState extends State<MapSearchScreen> {
               _clearSelection();
               FocusScope.of(context).unfocus();
             },
+            onMapEvent: (event) {
+              if (event is MapEventMoveEnd || event is MapEventFlingAnimationEnd) {
+                _saveMapPosition();
+              }
+            },
           ),
           children: [
             TileLayer(
               urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
               userAgentPackageName: 'com.tenantmatch.app',
-              tileProvider: NetworkTileProvider(),
+              tileProvider: CachedTileProvider(),
             ),
             MarkerLayer(
               markers: _filteredProps.map((p) => Marker(
@@ -415,6 +454,7 @@ class _MapSearchScreenState extends State<MapSearchScreen> {
   Widget _buildListView(BuildContext context) {
     return ListView.builder(
       padding: EdgeInsets.fromLTRB(16, 140 + MediaQuery.of(context).padding.top, 16, 16),
+      cacheExtent: 500,
       itemCount: _filteredProps.length,
       itemBuilder: (context, index) {
         final p = _filteredProps[index];

@@ -46,7 +46,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Expanded(
             child: ListView(
               padding: EdgeInsets.symmetric(horizontal: AppTheme.containerMargin),
-              physics: const BouncingScrollPhysics(),
+              cacheExtent: 500,
               children: [
                 SizedBox(height: MediaQuery.of(context).padding.top + 8),
                 AppTopBar(showBack: false),
@@ -54,6 +54,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 Text(
                   'Good morning, Jane.\nReady to find your match?',
                   style: AppTextStyle.headlineLgMobile.copyWith(color: cs.primary),
+                ),
+                SizedBox(height: AppTheme.spacingSm),
+                Text(
+                  'Explore rentals in Nairobi',
+                  style: AppTextStyle.bodyMd.copyWith(color: cs.onSurfaceVariant),
                 ),
                 SizedBox(height: AppTheme.spacingMd),
                 _buildSearchBar(context),
@@ -100,7 +105,7 @@ class _HomeScreenState extends State<HomeScreen> {
             SizedBox(width: AppTheme.spacingSm),
             Expanded(
               child: Text(
-                'Search neighborhoods, ZIP codes...',
+                'Search neighborhoods, estates...',
                 style: AppTextStyle.bodyMd.copyWith(color: cs.onSurfaceVariant),
               ),
             ),
@@ -139,7 +144,7 @@ class _HomeScreenState extends State<HomeScreen> {
           height: 140,
           child: ListView(
             scrollDirection: Axis.horizontal,
-            physics: const BouncingScrollPhysics(),
+            cacheExtent: 200,
             children: [
               _actionCard(Icons.directions_transit, 'Commute Hub', 'Check your routes', context, () => Navigator.pushNamed(context, '/commute-hub')),
               SizedBox(width: AppTheme.gutter),
@@ -218,7 +223,7 @@ class _HomeScreenState extends State<HomeScreen> {
           height: 180,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
-            physics: const BouncingScrollPhysics(),
+            cacheExtent: 200,
             itemCount: tourProps.length,
             itemBuilder: (context, index) {
               final p = tourProps[index];
@@ -319,22 +324,22 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         SizedBox(height: AppTheme.spacingMd),
         GestureDetector(
-          onTap: () => showAppAlert(context, 'Market Insight', 'Rent trends in Downtown: Average rent for 2 beds is down 4.5% compared to last month. Good time to negotiate.'),
-          child: Container(
-            padding: EdgeInsets.all(AppTheme.spacingMd),
-            decoration: BoxDecoration(
-              color: cs.surface,
-              border: Border(left: BorderSide(color: cs.secondary, width: 2)),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('RENT TRENDS IN DOWNTOWN', style: AppTextStyle.labelCaps.copyWith(color: cs.onSurfaceVariant)),
-                SizedBox(height: 4),
-                Text('-\$150', style: AppTextStyle.headlineLgMobile.copyWith(color: cs.primary)),
-                SizedBox(height: 8),
-                Text('Average rent for 2 beds is down 4.5% compared to last month. Good time to negotiate.', style: AppTextStyle.bodyMd.copyWith(color: cs.onSurfaceVariant)),
+              onTap: () => showAppAlert(context, 'Market Insight', 'Rent trends in Westlands: Average rent for 2 beds is down 4.5% compared to last month. Good time to negotiate.'),
+              child: Container(
+                padding: EdgeInsets.all(AppTheme.spacingMd),
+                decoration: BoxDecoration(
+                  color: cs.surface,
+                  border: Border(left: BorderSide(color: cs.secondary, width: 2)),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('RENT TRENDS IN WESTLANDS', style: AppTextStyle.labelCaps.copyWith(color: cs.onSurfaceVariant)),
+                    SizedBox(height: 4),
+                    Text('-KSh 5,000', style: AppTextStyle.headlineLgMobile.copyWith(color: cs.primary)),
+                    SizedBox(height: 8),
+                    Text('Average rent for 2 beds is down 4.5% compared to last month. Good time to negotiate.', style: AppTextStyle.bodyMd.copyWith(color: cs.onSurfaceVariant)),
                 SizedBox(height: 12),
                 Row(
                   children: [20, 32, 28, 18, 14, 10].map((h) => Expanded(

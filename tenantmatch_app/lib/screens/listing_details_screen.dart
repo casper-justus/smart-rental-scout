@@ -49,7 +49,7 @@ class _ListingDetailsScreenState extends State<ListingDetailsScreen> {
           AppTopBar(showBack: true),
           Expanded(
             child: ListView(
-              physics: const BouncingScrollPhysics(),
+              cacheExtent: 500,
               padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
               children: [
                   // Image carousel

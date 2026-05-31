@@ -90,7 +90,7 @@ class _ApplicationPortalStep1ScreenState extends State<ApplicationPortalStep1Scr
         decoration: InputDecoration(
           prefixIcon: Icon(icon, size: 20, color: cs.onSurfaceVariant),
           filled: true, fillColor: cs.surface,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
+          border: InputBorder.none,
         ),
         style: AppTextStyle.bodyMd,
         validator: (v) => v == null || v.isEmpty ? 'Required' : null,

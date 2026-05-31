@@ -128,7 +128,7 @@ class _ApplicationPortalStep3ScreenState extends State<ApplicationPortalStep3Scr
       TextField(
         decoration: InputDecoration(
           filled: true, fillColor: cs.surface,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
+          border: InputBorder.none,
           contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         ),
         style: AppTextStyle.bodyMd,

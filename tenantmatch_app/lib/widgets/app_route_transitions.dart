@@ -12,7 +12,7 @@ class AppRouteTransitions {
           child: child,
         );
       },
-      transitionDuration: const Duration(milliseconds: 80),
+      transitionDuration: const Duration(milliseconds: 50),
     );
   }
 
@@ -26,7 +26,7 @@ class AppRouteTransitions {
           child: child,
         );
       },
-      transitionDuration: const Duration(milliseconds: 80),
+      transitionDuration: const Duration(milliseconds: 50),
     );
   }
 
@@ -40,7 +40,7 @@ class AppRouteTransitions {
           child: child,
         );
       },
-      transitionDuration: const Duration(milliseconds: 80),
+      transitionDuration: const Duration(milliseconds: 50),
     );
   }
 }

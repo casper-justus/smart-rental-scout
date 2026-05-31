@@ -40,7 +40,7 @@ class VirtualTourListScreen extends StatelessWidget {
               Expanded(
                 child: ListView.builder(
                   padding: EdgeInsets.all(AppTheme.containerMargin),
-                  physics: const BouncingScrollPhysics(),
+                  cacheExtent: 500,
                   itemCount: tourProps.length,
                   itemBuilder: (context, index) {
                     final p = tourProps[index];
