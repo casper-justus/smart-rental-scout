@@ -169,26 +169,31 @@ class _MapSearchScreenState extends State<MapSearchScreen> {
     setState(() => _selectedProperty = null);
   }
 
-  List<PropertyListing> _getNearbyProperties({int count = 5}) {
-    final origin = _currentPosition;
-    final selectedId = _selectedProperty?.id;
+  List<PropertyListing> _getNearbyProperties({int count = 5, LatLng? origin, String? excludeId}) {
     final all = PropertyListing.sampleProperties
-        .where((p) => p.id != selectedId)
+        .where((p) => p.id != excludeId)
         .toList();
     if (all.isEmpty) return [];
     final dist = Distance();
-    if (origin == null) {
-      // fallback: sort by proximity to the selected property
-      if (selectedId == null) return all.take(count).toList();
-      final sel = PropertyListing.sampleProperties.firstWhere((p) => p.id == selectedId);
-      final selPoint = LatLng(sel.lat, sel.lng);
-      all.sort((a, b) => dist(LatLng(a.lat, a.lng), selPoint)
-          .compareTo(dist(LatLng(b.lat, b.lng), selPoint)));
-    } else {
+    if (origin != null) {
       all.sort((a, b) => dist(LatLng(a.lat, a.lng), origin)
           .compareTo(dist(LatLng(b.lat, b.lng), origin)));
+    } else if (_currentPosition != null) {
+      all.sort((a, b) => dist(LatLng(a.lat, a.lng), _currentPosition!)
+          .compareTo(dist(LatLng(b.lat, b.lng), _currentPosition!)));
     }
     return all.take(count).toList();
+  }
+
+  List<PropertyListing> _getNearbyPropertiesFromList({required List<PropertyListing> props, int count = 5}) {
+    if (props.isEmpty) return [];
+    final list = [...props];
+    if (_currentPosition != null) {
+      final dist = Distance();
+      list.sort((a, b) => dist(LatLng(a.lat, a.lng), _currentPosition!)
+          .compareTo(dist(LatLng(b.lat, b.lng), _currentPosition!)));
+    }
+    return list.take(count).toList();
   }
 
   void _applyFilters(FilterOptions f) {
@@ -245,6 +250,25 @@ class _MapSearchScreenState extends State<MapSearchScreen> {
     _applyFiltersAndSearch();
   }
 
+  String get _nearYouTitle {
+    if (_selectedProperty != null) return 'In the Area';
+    if (_searchCtrl.text.trim().isNotEmpty) return 'In the Area';
+    return 'Near You';
+  }
+
+  List<PropertyListing> get _nearYouProperties {
+    if (_selectedProperty != null) {
+      return _getNearbyProperties(
+        origin: LatLng(_selectedProperty!.lat, _selectedProperty!.lng),
+        excludeId: _selectedProperty!.id,
+      );
+    }
+    if (_searchCtrl.text.trim().isNotEmpty) {
+      return _getNearbyPropertiesFromList(props: _filteredProps);
+    }
+    return _getNearbyProperties();
+  }
+
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
@@ -260,6 +284,7 @@ class _MapSearchScreenState extends State<MapSearchScreen> {
               Expanded(
                 child: _isListView ? _buildListView(context) : _buildMapView(context),
               ),
+              _buildBottomPanel(context),
               AppBottomNav(
                 currentIndex: 1,
                 onTap: (i) {
@@ -285,6 +310,28 @@ class _MapSearchScreenState extends State<MapSearchScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildBottomPanel(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (_selectedProperty != null)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+            child: _PropertySummaryCard(
+              property: _selectedProperty!,
+              onTap: () => Navigator.pushNamed(context, '/listing-details', arguments: _selectedProperty!.id),
+              onClose: _clearSelection,
+            ),
+          ),
+        _NearYouBar(
+          title: _nearYouTitle,
+          properties: _nearYouProperties,
+          onTap: _selectProperty,
+        ),
+      ],
     );
   }
 
@@ -484,34 +531,13 @@ class _MapSearchScreenState extends State<MapSearchScreen> {
         ),
         Positioned(
           right: 16,
-          bottom: 220,
+          bottom: 16,
           child: _ZoomControls(
             onZoomIn: () => _mapCtrl.move(_mapCtrl.camera.center, _mapCtrl.camera.zoom + 1),
             onZoomOut: () => _mapCtrl.move(_mapCtrl.camera.center, _mapCtrl.camera.zoom - 1),
             onMyLocation: _goToMyLocation,
           ),
         ),
-        if (_selectedProperty != null)
-          Positioned(
-            left: 16, right: 16, bottom: 110,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _PropertySummaryCard(
-                  property: _selectedProperty!,
-                  onTap: () => Navigator.pushNamed(context, '/listing-details', arguments: _selectedProperty!.id),
-                  onClose: _clearSelection,
-                ),
-                const SizedBox(height: 8),
-                _NearYouSection(
-                  properties: _getNearbyProperties(),
-                  currentPosition: _currentPosition,
-                  onTap: _selectProperty,
-                ),
-              ],
-            ),
-          ),
       ],
     );
   }
@@ -598,13 +624,13 @@ class _PropertySummaryCard extends StatelessWidget {
   }
 }
 
-class _NearYouSection extends StatelessWidget {
+class _NearYouBar extends StatelessWidget {
+  final String title;
   final List<PropertyListing> properties;
-  final LatLng? currentPosition;
   final ValueChanged<PropertyListing> onTap;
-  const _NearYouSection({
+  const _NearYouBar({
+    required this.title,
     required this.properties,
-    required this.currentPosition,
     required this.onTap,
   });
 
@@ -614,11 +640,10 @@ class _NearYouSection extends StatelessWidget {
     if (properties.isEmpty) return const SizedBox.shrink();
 
     return Container(
-      padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
+      padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
       decoration: BoxDecoration(
         color: cs.surface,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 10)],
+        border: Border(top: BorderSide(color: cs.outlineVariant, width: 0.5)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -629,7 +654,7 @@ class _NearYouSection extends StatelessWidget {
               Icon(Icons.near_me, size: 14, color: cs.primary),
               const SizedBox(width: 6),
               Text(
-                currentPosition != null ? 'Near You' : 'Nearby',
+                title,
                 style: AppTextStyle.labelCaps.copyWith(
                   color: cs.onSurfaceVariant,
                 ),
