@@ -596,14 +596,28 @@ class _PropertySummaryCard extends StatelessWidget {
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: cs.surface,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 10)],
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 15,
+            offset: const Offset(0, 4),
+          ),
+        ],
+        border: Border.all(color: cs.outlineVariant.withOpacity(0.5)),
       ),
       child: Row(
         children: [
           ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: CachedNetworkImage(imageUrl: property.imageUrl, width: 70, height: 70, fit: BoxFit.cover),
+            borderRadius: BorderRadius.circular(12),
+            child: CachedNetworkImage(
+              imageUrl: property.imageUrl,
+              width: 72,
+              height: 72,
+              fit: BoxFit.cover,
+              memCacheWidth: 144,
+              memCacheHeight: 144,
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -611,13 +625,68 @@ class _PropertySummaryCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(property.price, style: AppTextStyle.headlineSm),
-                Text(property.address, style: AppTextStyle.bodyMd, maxLines: 1, overflow: TextOverflow.ellipsis),
+                Text(
+                  property.price,
+                  style: AppTextStyle.headlineSm.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: cs.primary,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  property.address,
+                  style: AppTextStyle.bodyMd.copyWith(
+                    color: cs.onSurface,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    Icon(Icons.bed_outlined, size: 14, color: cs.onSurfaceVariant),
+                    const SizedBox(width: 4),
+                    Text(
+                      '${property.beds}',
+                      style: AppTextStyle.bodyMd.copyWith(
+                        fontSize: 12,
+                        color: cs.onSurfaceVariant,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Icon(Icons.square_foot_outlined, size: 14, color: cs.onSurfaceVariant),
+                    const SizedBox(width: 4),
+                    Text(
+                      '${property.sqft} sqft',
+                      style: AppTextStyle.bodyMd.copyWith(
+                        fontSize: 12,
+                        color: cs.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
               ],
             ),
           ),
-          IconButton(onPressed: onTap, icon: Icon(Icons.arrow_forward_ios, size: 18, color: cs.primary)),
-          IconButton(onPressed: onClose, icon: const Icon(Icons.close, size: 18)),
+          const SizedBox(width: 4),
+          Material(
+            color: cs.primaryContainer.withOpacity(0.4),
+            borderRadius: BorderRadius.circular(12),
+            child: InkWell(
+              onTap: onTap,
+              borderRadius: BorderRadius.circular(12),
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Icon(Icons.arrow_forward_ios, size: 16, color: cs.primary),
+              ),
+            ),
+          ),
+          const SizedBox(width: 4),
+          IconButton(
+            onPressed: onClose,
+            icon: Icon(Icons.close, size: 20, color: cs.onSurfaceVariant),
+            visualDensity: VisualDensity.compact,
+          ),
         ],
       ),
     );
@@ -640,10 +709,17 @@ class _NearYouBar extends StatelessWidget {
     if (properties.isEmpty) return const SizedBox.shrink();
 
     return Container(
-      padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
       decoration: BoxDecoration(
         color: cs.surface,
-        border: Border(top: BorderSide(color: cs.outlineVariant, width: 0.5)),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 10,
+            offset: const Offset(0, -4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -651,85 +727,117 @@ class _NearYouBar extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.near_me, size: 14, color: cs.primary),
-              const SizedBox(width: 6),
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: cs.primaryContainer.withOpacity(0.5),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(Icons.near_me, size: 12, color: cs.primary),
+              ),
+              const SizedBox(width: 10),
               Text(
-                title,
+                title.toUpperCase(),
                 style: AppTextStyle.labelCaps.copyWith(
-                  color: cs.onSurfaceVariant,
+                  color: cs.primary,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 1.2,
+                ),
+              ),
+              const Spacer(),
+              Text(
+                'View All',
+                style: AppTextStyle.bodyMd.copyWith(
+                  fontSize: 12,
+                  color: cs.primary,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 12),
           SizedBox(
-            height: 100,
+            height: 110,
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               cacheExtent: 200,
               itemCount: properties.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 8),
+              separatorBuilder: (_, __) => const SizedBox(width: 12),
               itemBuilder: (context, i) {
                 final p = properties[i];
                 return GestureDetector(
                   onTap: () => onTap(p),
                   child: Container(
-                    width: 160,
+                    width: 180,
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(8),
-                      color: cs.surfaceContainerHigh,
+                      borderRadius: BorderRadius.circular(16),
+                      color: cs.surfaceContainerHigh.withOpacity(0.6),
+                      border: Border.all(color: cs.outlineVariant.withOpacity(0.3)),
                     ),
                     clipBehavior: Clip.antiAlias,
                     child: Row(
                       children: [
                         ClipRRect(
                           borderRadius: const BorderRadius.horizontal(
-                            left: Radius.circular(8),
+                            left: Radius.circular(15),
                           ),
                           child: CachedNetworkImage(
                             imageUrl: p.imageUrl,
-                            width: 70,
-                            height: 100,
+                            width: 80,
+                            height: 110,
                             fit: BoxFit.cover,
-                            memCacheWidth: 70,
-                            memCacheHeight: 100,
+                            memCacheWidth: 160,
+                            memCacheHeight: 220,
                           ),
                         ),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: 10),
                         Expanded(
                           child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 6),
+                            padding: const EdgeInsets.symmetric(vertical: 8),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisSize: MainAxisSize.min,
+                              mainAxisAlignment: MainAxisSize.min,
                               children: [
                                 Text(
                                   p.price,
-                                  style: AppTextStyle.headlineSm.copyWith(fontSize: 13),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  p.address,
-                                  style: AppTextStyle.bodyMd.copyWith(fontSize: 11),
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                const Spacer(),
-                                Text(
-                                  '${p.beds} bed · ${p.sqft} sqft',
-                                  style: AppTextStyle.bodyMd.copyWith(
-                                    color: cs.onSurfaceVariant,
-                                    fontSize: 10,
+                                  style: AppTextStyle.headlineSm.copyWith(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w700,
                                   ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  p.neighborhood,
+                                  style: AppTextStyle.bodyMd.copyWith(
+                                    fontSize: 11,
+                                    color: cs.onSurface,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const Spacer(),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: cs.secondaryContainer.withOpacity(0.4),
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: Text(
+                                    '${p.beds} BR',
+                                    style: AppTextStyle.bodyMd.copyWith(
+                                      color: cs.secondary,
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
                                 ),
                               ],
                             ),
                           ),
                         ),
+                        const SizedBox(width: 4),
                       ],
                     ),
                   ),
