@@ -411,7 +411,7 @@ class _MapSearchScreenState extends State<MapSearchScreen> {
             TileLayer(
               urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
               userAgentPackageName: 'com.tenantmatch.app',
-              tileProvider: CachedTileProvider(),
+              tileProvider: CancellableNetworkTileProvider(),
             ),
             MarkerLayer(
               markers: _filteredProps.map((p) => Marker(
