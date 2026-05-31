@@ -41,6 +41,7 @@ class _MapSearchScreenState extends State<MapSearchScreen> {
   LatLng _initialCenter = _defaultCenter;
   double _initialZoom = _defaultZoom;
   bool _positionRestored = false;
+  LatLng? _currentPosition;
 
   @override
   void initState() {
@@ -111,7 +112,8 @@ class _MapSearchScreenState extends State<MapSearchScreen> {
           ),
         );
         if (mounted) {
-          _mapCtrl.move(LatLng(pos.latitude, pos.longitude), 14);
+          _currentPosition = LatLng(pos.latitude, pos.longitude);
+          _mapCtrl.move(_currentPosition!, 14);
         }
       }
     } catch (e) {
@@ -136,6 +138,27 @@ class _MapSearchScreenState extends State<MapSearchScreen> {
 
   void _clearSelection() {
     setState(() => _selectedProperty = null);
+  }
+
+  List<PropertyListing> _getNearbyProperties({int count = 5}) {
+    final origin = _currentPosition;
+    final selectedId = _selectedProperty?.id;
+    final all = PropertyListing.sampleProperties
+        .where((p) => p.id != selectedId)
+        .toList();
+    if (all.isEmpty) return [];
+    if (origin == null) {
+      // fallback: sort by proximity to the selected property
+      if (selectedId == null) return all.take(count).toList();
+      final sel = PropertyListing.sampleProperties.firstWhere((p) => p.id == selectedId);
+      final selPoint = LatLng(sel.lat, sel.lng);
+      all.sort((a, b) => selPoint.distanceTo(LatLng(a.lat, a.lng))
+          .compareTo(selPoint.distanceTo(LatLng(b.lat, b.lng))));
+    } else {
+      all.sort((a, b) => origin.distanceTo(LatLng(a.lat, a.lng))
+          .compareTo(origin.distanceTo(LatLng(b.lat, b.lng))));
+    }
+    return all.take(count).toList();
   }
 
   void _applyFilters(FilterOptions f) {
@@ -440,11 +463,23 @@ class _MapSearchScreenState extends State<MapSearchScreen> {
         ),
         if (_selectedProperty != null)
           Positioned(
-            left: 16, right: 16, bottom: 120,
-            child: _PropertySummaryCard(
-              property: _selectedProperty!,
-              onTap: () => Navigator.pushNamed(context, '/listing-details', arguments: _selectedProperty!.id),
-              onClose: _clearSelection,
+            left: 16, right: 16, bottom: 110,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _PropertySummaryCard(
+                  property: _selectedProperty!,
+                  onTap: () => Navigator.pushNamed(context, '/listing-details', arguments: _selectedProperty!.id),
+                  onClose: _clearSelection,
+                ),
+                const SizedBox(height: 8),
+                _NearYouSection(
+                  properties: _getNearbyProperties(),
+                  currentPosition: _currentPosition,
+                  onTap: _selectProperty,
+                ),
+              ],
             ),
           ),
       ],
@@ -527,6 +562,127 @@ class _PropertySummaryCard extends StatelessWidget {
           ),
           IconButton(onPressed: onTap, icon: Icon(Icons.arrow_forward_ios, size: 18, color: cs.primary)),
           IconButton(onPressed: onClose, icon: const Icon(Icons.close, size: 18)),
+        ],
+      ),
+    );
+  }
+}
+
+class _NearYouSection extends StatelessWidget {
+  final List<PropertyListing> properties;
+  final LatLng? currentPosition;
+  final ValueChanged<PropertyListing> onTap;
+  const _NearYouSection({
+    required this.properties,
+    required this.currentPosition,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    if (properties.isEmpty) return const SizedBox.shrink();
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(12, 10, 12, 12),
+      decoration: BoxDecoration(
+        color: cs.surface,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 10)],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.near_me, size: 14, color: cs.primary),
+              const SizedBox(width: 6),
+              Text(
+                currentPosition != null ? 'Near You' : 'Nearby',
+                style: AppTextStyle.bodySm.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: cs.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          SizedBox(
+            height: 100,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              cacheExtent: 200,
+              itemCount: properties.length,
+              separatorBuilder: (_, __) => const SizedBox(width: 8),
+              itemBuilder: (context, i) {
+                final p = properties[i];
+                return GestureDetector(
+                  onTap: () => onTap(p),
+                  child: Container(
+                    width: 160,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      color: cs.surfaceContainerHigh,
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    child: Row(
+                      children: [
+                        ClipRRect(
+                          borderRadius: const BorderRadius.horizontal(
+                            left: Radius.circular(8),
+                          ),
+                          child: CachedNetworkImage(
+                            imageUrl: p.imageUrl,
+                            width: 70,
+                            height: 100,
+                            fit: BoxFit.cover,
+                            memCacheWidth: 70,
+                            memCacheHeight: 100,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 6),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  p.price,
+                                  style: AppTextStyle.headlineXs,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  p.address,
+                                  style: AppTextStyle.bodyXs,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                const Spacer(),
+                                Text(
+                                  '${p.beds} bed · ${p.sqft} sqft',
+                                  style: AppTextStyle.bodyXs.copyWith(
+                                    color: cs.onSurfaceVariant,
+                                    fontSize: 10,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
         ],
       ),
     );
