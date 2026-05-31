@@ -113,6 +113,40 @@ class _MapSearchScreenState extends State<MapSearchScreen> {
         );
         if (mounted) {
           _currentPosition = LatLng(pos.latitude, pos.longitude);
+        }
+      }
+    } catch (e) {
+      // Silently ignore — user can tap the my-location button to retry.
+    }
+  }
+
+  Future<void> _goToMyLocation() async {
+    try {
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        if (mounted) showToast(context, 'Location services are disabled.');
+        return;
+      }
+
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+      }
+      
+      if (permission == LocationPermission.deniedForever) {
+        if (mounted) showToast(context, 'Location permissions are permanently denied.');
+        return;
+      }
+
+      if (permission == LocationPermission.whileInUse || permission == LocationPermission.always) {
+        final pos = await Geolocator.getCurrentPosition(
+          locationSettings: const LocationSettings(
+            accuracy: LocationAccuracy.high,
+            timeLimit: Duration(seconds: 10),
+          ),
+        );
+        if (mounted) {
+          _currentPosition = LatLng(pos.latitude, pos.longitude);
           _mapCtrl.move(_currentPosition!, 14);
         }
       }
@@ -121,11 +155,6 @@ class _MapSearchScreenState extends State<MapSearchScreen> {
         showToast(context, 'Could not get current location. Using default.');
       }
     }
-  }
-
-  Future<void> _goToMyLocation() async {
-    await _initLocation();
-    if (mounted) showToast(context, 'Centered on your location');
   }
 
   void _selectProperty(PropertyListing p) {
@@ -147,16 +176,17 @@ class _MapSearchScreenState extends State<MapSearchScreen> {
         .where((p) => p.id != selectedId)
         .toList();
     if (all.isEmpty) return [];
+    final dist = Distance();
     if (origin == null) {
       // fallback: sort by proximity to the selected property
       if (selectedId == null) return all.take(count).toList();
       final sel = PropertyListing.sampleProperties.firstWhere((p) => p.id == selectedId);
       final selPoint = LatLng(sel.lat, sel.lng);
-      all.sort((a, b) => selPoint.distanceTo(LatLng(a.lat, a.lng))
-          .compareTo(selPoint.distanceTo(LatLng(b.lat, b.lng))));
+      all.sort((a, b) => dist(LatLng(a.lat, a.lng), selPoint)
+          .compareTo(dist(LatLng(b.lat, b.lng), selPoint)));
     } else {
-      all.sort((a, b) => origin.distanceTo(LatLng(a.lat, a.lng))
-          .compareTo(origin.distanceTo(LatLng(b.lat, b.lng))));
+      all.sort((a, b) => dist(LatLng(a.lat, a.lng), origin)
+          .compareTo(dist(LatLng(b.lat, b.lng), origin)));
     }
     return all.take(count).toList();
   }
@@ -600,8 +630,7 @@ class _NearYouSection extends StatelessWidget {
               const SizedBox(width: 6),
               Text(
                 currentPosition != null ? 'Near You' : 'Nearby',
-                style: AppTextStyle.bodySm.copyWith(
-                  fontWeight: FontWeight.w600,
+                style: AppTextStyle.labelCaps.copyWith(
                   color: cs.onSurfaceVariant,
                 ),
               ),
@@ -651,21 +680,21 @@ class _NearYouSection extends StatelessWidget {
                               children: [
                                 Text(
                                   p.price,
-                                  style: AppTextStyle.headlineXs,
+                                  style: AppTextStyle.headlineSm.copyWith(fontSize: 13),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
                                 const SizedBox(height: 2),
                                 Text(
                                   p.address,
-                                  style: AppTextStyle.bodyXs,
+                                  style: AppTextStyle.bodyMd.copyWith(fontSize: 11),
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
                                 ),
                                 const Spacer(),
                                 Text(
                                   '${p.beds} bed · ${p.sqft} sqft',
-                                  style: AppTextStyle.bodyXs.copyWith(
+                                  style: AppTextStyle.bodyMd.copyWith(
                                     color: cs.onSurfaceVariant,
                                     fontSize: 10,
                                   ),
