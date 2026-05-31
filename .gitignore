@@ -20,3 +20,5 @@ tenantmatch_app/ios/Flutter/Flutter.framework
 tenantmatch_app/ios/Flutter/Flutter.podspec
 tenantmatch_app/ios/Runner.xcworkspace/xcuserdata/
 tenantmatch_app/pubspec.lock
+
+app-debug.apk
